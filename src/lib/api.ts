@@ -33,8 +33,7 @@ export async function generateUserStory(
 
     const result = await response.json();
     
-    // Store the user story in Supabase using a custom RPC function
-    // We need to cast the entire parameters object to any to avoid TypeScript errors
+    // Store the user story in Supabase using the custom RPC function
     const { error } = await supabase.rpc(
       'save_user_story', 
       {
@@ -45,12 +44,13 @@ export async function generateUserStory(
         p_api_required: data.api_required || false,
         p_additional_details: data.additional_details || null,
         p_result: result
-      } as any
+      } as any // Type assertion is necessary since the RPC function isn't in the generated types
     );
     
     if (error) {
       console.error("Error saving user story:", error);
-      // Don't throw here, still return the result
+      toast.error("Your story was generated but could not be saved to the database.");
+      // Still return the result even if saving failed
     }
 
     return result;
