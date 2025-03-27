@@ -13,6 +13,7 @@ const Index = () => {
 
   const handleSuccess = (result: UserStoryResponse) => {
     setUserStory(result);
+    setIsSubmitting(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { UserStoryRequest } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -6,11 +5,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { X, Plus, Loader2, BrainCircuit, Settings, Users, Database, FileText } from "lucide-react";
+import { X, Plus, BrainCircuit, Settings, Users, Database, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { generateUserStory } from "@/lib/api";
+import LoadingAnimation from "./LoadingAnimation";
 
 interface UserStoryFormProps {
   onSuccess: (userStory: any) => void;
@@ -87,6 +87,14 @@ const UserStoryForm = ({
   const toggleAdditionalFields = () => {
     setShowAdditionalFields(!showAdditionalFields);
   };
+
+  if (isSubmitting) {
+    return (
+      <Card className="w-full max-w-2xl p-8 glass-panel animate-fade-in tech-border flex flex-col items-center justify-center min-h-[500px]">
+        <LoadingAnimation />
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full max-w-2xl p-6 glass-panel animate-fade-in tech-border">
