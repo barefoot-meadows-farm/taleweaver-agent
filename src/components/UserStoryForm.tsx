@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { X, Plus, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { X, Plus, Loader2, BrainCircuit, Settings, Users, Database, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -89,10 +89,11 @@ const UserStoryForm = ({
   };
 
   return (
-    <Card className="w-full max-w-2xl p-6 glass-panel animate-fade-in">
+    <Card className="w-full max-w-2xl p-6 glass-panel animate-fade-in tech-border">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-1">
-          <Label htmlFor="requirement" className="input-label">
+          <Label htmlFor="requirement" className="input-label flex items-center gap-1.5">
+            <FileText className="h-4 w-4 text-primary" />
             <span className="text-destructive">*</span> Requirement
           </Label>
           <Textarea
@@ -100,7 +101,7 @@ const UserStoryForm = ({
             value={requirement}
             onChange={(e) => setRequirement(e.target.value)}
             placeholder="Describe what you want to accomplish..."
-            className={`min-h-24 transition-all duration-200 ${
+            className={`min-h-24 transition-all duration-200 focus:border-primary/50 focus:ring-primary/30 ${
               errors.requirement ? "border-destructive ring-destructive" : ""
             }`}
             disabled={isSubmitting}
@@ -121,8 +122,9 @@ const UserStoryForm = ({
           />
           <Label
             htmlFor="show-more"
-            className="input-label !mb-0 cursor-pointer"
+            className="input-label !mb-0 cursor-pointer flex items-center gap-1.5"
           >
+            <Settings className="h-4 w-4 text-primary" />
             {showAdditionalFields ? 
               "Hide additional fields" : 
               "Show additional fields"}
@@ -132,7 +134,8 @@ const UserStoryForm = ({
         <Collapsible open={showAdditionalFields} className="space-y-4">
           <CollapsibleContent className="space-y-4">
             <div className="space-y-1">
-              <Label htmlFor="context" className="input-label">
+              <Label htmlFor="context" className="input-label flex items-center gap-1.5">
+                <BrainCircuit className="h-4 w-4 text-primary" />
                 Context
               </Label>
               <Textarea
@@ -140,13 +143,14 @@ const UserStoryForm = ({
                 value={context}
                 onChange={(e) => setContext(e.target.value)}
                 placeholder="Provide background information or context..."
-                className="min-h-20 transition-all duration-200"
+                className="min-h-20 transition-all duration-200 focus:border-primary/50 focus:ring-primary/30"
                 disabled={isSubmitting}
               />
             </div>
 
             <div className="space-y-1">
-              <Label htmlFor="stakeholders" className="input-label">
+              <Label htmlFor="stakeholders" className="input-label flex items-center gap-1.5">
+                <Users className="h-4 w-4 text-primary" />
                 Stakeholders
               </Label>
               <div className="flex items-center gap-2">
@@ -156,7 +160,7 @@ const UserStoryForm = ({
                   onChange={(e) => setStakeholderInput(e.target.value)}
                   onKeyDown={handleStakeholderKeyDown}
                   placeholder="Add stakeholder"
-                  className="transition-all duration-200"
+                  className="transition-all duration-200 focus:border-primary/50 focus:ring-primary/30"
                   disabled={isSubmitting}
                 />
                 <Button
@@ -177,7 +181,7 @@ const UserStoryForm = ({
                     <Badge
                       key={index}
                       variant="secondary"
-                      className="pl-3 pr-2 py-1.5 flex items-center gap-1 hover:bg-secondary/80 animate-fade-in"
+                      className="pl-3 pr-2 py-1.5 flex items-center gap-1 hover:bg-secondary/80 animate-fade-in bg-primary/10 text-primary"
                     >
                       {stakeholder}
                       <button
@@ -203,14 +207,16 @@ const UserStoryForm = ({
               />
               <Label
                 htmlFor="api-required"
-                className="input-label !mb-0 cursor-pointer"
+                className="input-label !mb-0 cursor-pointer flex items-center gap-1.5"
               >
+                <Database className="h-4 w-4 text-primary" />
                 API Required
               </Label>
             </div>
 
             <div className="space-y-1">
-              <Label htmlFor="additional-details" className="input-label">
+              <Label htmlFor="additional-details" className="input-label flex items-center gap-1.5">
+                <FileText className="h-4 w-4 text-primary" />
                 Additional Details
               </Label>
               <Textarea
@@ -218,7 +224,7 @@ const UserStoryForm = ({
                 value={additionalDetails}
                 onChange={(e) => setAdditionalDetails(e.target.value)}
                 placeholder="Any other details you'd like to include..."
-                className="min-h-20 transition-all duration-200"
+                className="min-h-20 transition-all duration-200 focus:border-primary/50 focus:ring-primary/30"
                 disabled={isSubmitting}
               />
             </div>
@@ -227,7 +233,7 @@ const UserStoryForm = ({
 
         <Button
           type="submit"
-          className="w-full py-6 hover-lift transition-all duration-300 font-medium"
+          className="w-full py-6 hover-lift transition-all duration-300 font-medium bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
           disabled={isSubmitting}
         >
           {isSubmitting ? (
@@ -236,7 +242,10 @@ const UserStoryForm = ({
               Generating User Story...
             </>
           ) : (
-            "Generate User Story"
+            <>
+              <BrainCircuit className="mr-2 h-5 w-5" />
+              Generate User Story
+            </>
           )}
         </Button>
       </form>

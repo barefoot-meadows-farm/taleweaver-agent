@@ -5,7 +5,7 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
+    --background: 240 10% 98%;
     --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
@@ -14,24 +14,24 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 221 83% 53%;
+    --primary: 250 83% 60%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96%;
+    --secondary: 260 40% 96%;
     --secondary-foreground: 222 47% 11%;
 
     --muted: 210 40% 96%;
     --muted-foreground: 215 16% 47%;
 
-    --accent: 221 70% 95%;
-    --accent-foreground: 221 83% 53%;
+    --accent: 270 70% 95%;
+    --accent-foreground: 250 83% 60%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 221 83% 53%;
+    --ring: 250 83% 60%;
 
     --radius: 0.75rem;
 
@@ -55,7 +55,7 @@
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217 91% 60%;
+    --primary: 267 91% 65%;
     --primary-foreground: 222 47% 11%;
 
     --secondary: 217 33% 17%;
@@ -64,7 +64,7 @@
     --muted: 217 33% 17%;
     --muted-foreground: 215 20% 65%;
 
-    --accent: 217 33% 17%;
+    --accent: 267 33% 25%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 63% 31%;
@@ -72,7 +72,7 @@
 
     --border: 217 33% 17%;
     --input: 217 33% 17%;
-    --ring: 213 27% 84%;
+    --ring: 267 40% 75%;
     
     --sidebar-background: 240 6% 10%;
     --sidebar-foreground: 240 5% 96%;
@@ -92,12 +92,16 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    background-image: radial-gradient(circle at 1px 1px, hsl(var(--border)) 1px, transparent 0);
+    background-size: 40px 40px;
+    background-position: -19px -19px;
   }
 }
 
 @layer components {
   .glass-panel {
     @apply bg-white/70 backdrop-blur-sm border border-white/20 shadow-glass rounded-lg;
+    box-shadow: 0 8px 32px rgba(78, 0, 148, 0.07);
   }
   
   .input-label {
@@ -115,4 +119,31 @@
   .hover-lift {
     @apply transition-transform duration-300 hover:-translate-y-1;
   }
+  
+  .ai-gradient-bg {
+    @apply bg-gradient-to-br from-primary/40 via-purple-400/10 to-blue-300/20;
+  }
+  
+  .tech-border {
+    @apply border border-primary/30 relative overflow-hidden;
+  }
+  
+  .tech-border::before {
+    content: '';
+    @apply absolute inset-0 border-t-2 border-l-2 border-primary/40;
+    clip-path: polygon(0 0, 30px 0, 0 30px);
+  }
+  
+  .tech-border::after {
+    content: '';
+    @apply absolute bottom-0 right-0 border-b-2 border-r-2 border-primary/40;
+    width: 30px;
+    height: 30px;
+    clip-path: polygon(100% 100%, 100% calc(100% - 30px), calc(100% - 30px) 100%);
+  }
+  
+  .ai-text-gradient {
+    @apply bg-gradient-to-br from-primary to-blue-400 bg-clip-text text-transparent;
+  }
 }
+
