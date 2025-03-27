@@ -13,6 +13,7 @@ import ManageSubscription from "@/components/ManageSubscription";
 import AccountSettings from "@/components/AccountSettings";
 import UserStoryList from "@/components/UserStoryList";
 import { UserStoryResponse } from "@/types";
+import { Json } from "@/integrations/supabase/types";
 
 interface UserStory {
   id: string;
@@ -23,6 +24,19 @@ interface UserStory {
   stakeholders?: string[];
   api_required?: boolean;
   additional_details?: string;
+}
+
+// Interface representing the raw data from Supabase
+interface RawUserStory {
+  id: string;
+  created_at: string;
+  requirement: string;
+  result: Json;
+  context?: string;
+  stakeholders?: string[];
+  api_required?: boolean;
+  additional_details?: string;
+  user_id: string;
 }
 
 const ProfileSettings = () => {
@@ -52,7 +66,11 @@ const ProfileSettings = () => {
         throw error;
       }
       
-      return data as UserStory[];
+      // Transform the raw data to match our UserStory interface
+      return (data as RawUserStory[]).map(story => ({
+        ...story,
+        result: story.result as unknown as UserStoryResponse
+      })) as UserStory[];
     },
     enabled: !!user,
   });
