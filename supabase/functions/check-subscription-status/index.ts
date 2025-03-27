@@ -61,7 +61,7 @@ serve(async (req) => {
 
     const customerId = customers.data[0].id;
     
-    // Check for active subscriptions
+    // Check for active subscriptions (both monthly and yearly)
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
       status: 'active',

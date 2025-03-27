@@ -54,15 +54,15 @@ serve(async (req) => {
     // Set price ID based on the selected plan
     switch (plan) {
       case 'one_time':
-        price_id = 'price_one_time'; // Replace with your actual one-time price ID
+        price_id = 'price_1R76oFPRdN87cPdW5egSuEmu'; // One-time credits price
         mode = 'payment';
         break;
       case 'monthly':
-        price_id = 'price_monthly'; // Replace with your actual monthly subscription price ID
+        price_id = 'price_1R76oyPRdN87cPdW1Hd6eeTs'; // Monthly subscription price
         mode = 'subscription';
         break;
       case 'yearly':
-        price_id = 'price_yearly'; // Replace with your actual yearly subscription price ID
+        price_id = 'price_1R76oyPRdN87cPdW378gtG77'; // Yearly subscription price
         mode = 'subscription';
         break;
       default:
