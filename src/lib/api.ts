@@ -34,15 +34,16 @@ export async function generateUserStory(
 
     const result = await response.json();
     
-    // Store the user story in Supabase
-    const { error } = await supabase.from('user_stories').insert({
-      user_id: session.user.id,
-      requirement: data.requirement,
-      context: data.context || null,
-      stakeholders: data.stakeholders || null,
-      api_required: data.api_required || false,
-      additional_details: data.additional_details || null,
-      result: result
+    // Store the user story in Supabase using a custom RPC instead of direct table access
+    // This works around the TypeScript issue since we can use any parameters with RPC
+    const { error } = await supabase.rpc('save_user_story', {
+      p_user_id: session.user.id,
+      p_requirement: data.requirement,
+      p_context: data.context || null,
+      p_stakeholders: data.stakeholders || null,
+      p_api_required: data.api_required || false,
+      p_additional_details: data.additional_details || null,
+      p_result: result
     });
     
     if (error) {
