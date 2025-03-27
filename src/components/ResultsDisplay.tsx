@@ -16,6 +16,8 @@ import {
   BarChart,
   Layers,
   PenTool,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,11 +32,70 @@ interface ResultsDisplayProps {
   onReset: () => void;
 }
 
+// Create a collapsible section component for mobile
+const MobileSection = ({ 
+  title, 
+  icon: Icon, 
+  isOpen, 
+  onToggle, 
+  children 
+}: { 
+  title: string; 
+  icon: React.ElementType; 
+  isOpen: boolean; 
+  onToggle: () => void;
+  children: React.ReactNode;
+}) => {
+  return (
+    <div className="border border-primary/10 rounded-md mb-3 overflow-hidden">
+      <div 
+        className="flex items-center justify-between p-3 bg-primary/5 cursor-pointer"
+        onClick={onToggle}
+      >
+        <div className="flex items-center gap-2">
+          <Icon className="h-5 w-5 text-primary" />
+          <h3 className="text-md font-medium">{title}</h3>
+        </div>
+        {isOpen ? 
+          <ChevronDown className="h-4 w-4" /> : 
+          <ChevronRight className="h-4 w-4" />
+        }
+      </div>
+      {isOpen && (
+        <div className="p-3 bg-background">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const ResultsDisplay = ({ userStory, onReset }: ResultsDisplayProps) => {
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState("story");
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  
+  // State for mobile collapsible sections
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    story: true,
+    value: false,
+    useCases: false,
+    acceptance: false,
+    functional: false,
+    nonFunctional: false,
+    technical: false,
+    error: false,
+    test: false,
+    api: false
+  });
+
+  const toggleSection = (section: string) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
 
   const generateMarkdown = () => {
     let markdown = `# User Story\n\n${userStory.story}\n\n`;
@@ -134,6 +195,227 @@ const ResultsDisplay = ({ userStory, onReset }: ResultsDisplayProps) => {
     }
   };
 
+  // Render mobile view with collapsible sections
+  if (isMobile) {
+    return (
+      <Card className="w-full max-w-3xl p-4 glass-panel animate-fade-in space-y-4 tech-border">
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <FileText className="h-5 w-5 text-primary" />
+            User Story
+          </h2>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={copyToClipboard}
+            className="hover-lift"
+            title="Copy as Markdown"
+          >
+            {copied ? (
+              <Check className="h-4 w-4 text-green-500" />
+            ) : (
+              <ClipboardCopy className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+
+        <ScrollArea className="h-[calc(100vh-250px)]">
+          <div className="space-y-1">
+            <MobileSection 
+              title="User Story" 
+              icon={FileText}
+              isOpen={openSections.story}
+              onToggle={() => toggleSection('story')}
+            >
+              <div className="bg-accent/50 rounded-md whitespace-pre-wrap text-foreground border border-primary/10 p-3 text-sm">
+                {userStory.story}
+              </div>
+              
+              <div className="flex flex-wrap gap-2 mt-3">
+                <Badge variant="outline" className="bg-primary/10 text-primary text-xs">
+                  Priority: {userStory.priority}
+                </Badge>
+                <Badge variant="outline" className="bg-primary/10 text-primary text-xs">
+                  Effort: {userStory.effort_estimate}
+                </Badge>
+              </div>
+            </MobileSection>
+            
+            <MobileSection 
+              title="Value Statement" 
+              icon={PenTool}
+              isOpen={openSections.value}
+              onToggle={() => toggleSection('value')}
+            >
+              <p className="text-foreground/90 whitespace-pre-wrap text-sm">{userStory.value_statement}</p>
+            </MobileSection>
+            
+            <MobileSection 
+              title="Use Case Examples" 
+              icon={Lightbulb}
+              isOpen={openSections.useCases}
+              onToggle={() => toggleSection('useCases')}
+            >
+              <ul className="list-disc list-inside pl-2 space-y-2 text-sm">
+                {userStory.use_case_examples.map((example, index) => (
+                  <li key={index} className="text-foreground/90">
+                    {example}
+                  </li>
+                ))}
+              </ul>
+            </MobileSection>
+            
+            <MobileSection 
+              title="Acceptance Criteria" 
+              icon={ListChecks}
+              isOpen={openSections.acceptance}
+              onToggle={() => toggleSection('acceptance')}
+            >
+              <ul className="list-disc list-inside pl-2 space-y-1 text-sm">
+                {userStory.acceptance_criteria.map((criteria, index) => (
+                  <li key={index} className="text-foreground/90">
+                    {criteria}
+                  </li>
+                ))}
+              </ul>
+            </MobileSection>
+            
+            <MobileSection 
+              title="Functional Requirements" 
+              icon={Layers}
+              isOpen={openSections.functional}
+              onToggle={() => toggleSection('functional')}
+            >
+              <ul className="list-disc list-inside pl-2 space-y-1 text-sm">
+                {userStory.functional_requirements.map((req, index) => (
+                  <li key={index} className="text-foreground/90">
+                    {req}
+                  </li>
+                ))}
+              </ul>
+            </MobileSection>
+            
+            <MobileSection 
+              title="Non-Functional Requirements" 
+              icon={BarChart}
+              isOpen={openSections.nonFunctional}
+              onToggle={() => toggleSection('nonFunctional')}
+            >
+              <ul className="list-disc list-inside pl-2 space-y-1 text-sm">
+                {userStory.non_functional_requirements.map((req, index) => (
+                  <li key={index} className="text-foreground/90">
+                    {req}
+                  </li>
+                ))}
+              </ul>
+            </MobileSection>
+            
+            <MobileSection 
+              title="Technical Considerations" 
+              icon={Activity}
+              isOpen={openSections.technical}
+              onToggle={() => toggleSection('technical')}
+            >
+              <ul className="list-disc list-inside pl-2 space-y-1 text-sm">
+                {userStory.technical_considerations.map((consideration, index) => (
+                  <li key={index} className="text-foreground/90">
+                    {consideration}
+                  </li>
+                ))}
+              </ul>
+            </MobileSection>
+            
+            <MobileSection 
+              title="Error Scenarios" 
+              icon={AlertCircle}
+              isOpen={openSections.error}
+              onToggle={() => toggleSection('error')}
+            >
+              <div className="space-y-2">
+                {userStory.error_scenarios.map((scenario, index) => (
+                  <div key={index} className="p-2 bg-destructive/10 rounded-md text-sm">
+                    <p className="font-medium">{scenario.scenario}</p>
+                    <p className="text-xs text-destructive">{scenario.message}</p>
+                  </div>
+                ))}
+              </div>
+            </MobileSection>
+            
+            <MobileSection 
+              title="Test Cases" 
+              icon={TestTube}
+              isOpen={openSections.test}
+              onToggle={() => toggleSection('test')}
+            >
+              <div className="space-y-3">
+                {userStory.test_cases.map((testCase, index) => (
+                  <div key={index} className="p-2 bg-accent/30 rounded-md space-y-1 text-sm">
+                    <p className="font-medium">{testCase.title}</p>
+                    <p className="text-xs italic">{testCase.scenario}</p>
+                    
+                    <div className="space-y-1 mt-1">
+                      <p className="text-xs font-medium text-foreground/70">Given:</p>
+                      <ul className="list-disc list-inside pl-2 text-xs">
+                        {testCase.given.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <p className="text-xs font-medium text-foreground/70">When:</p>
+                      <ul className="list-disc list-inside pl-2 text-xs">
+                        {testCase.when.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <p className="text-xs font-medium text-foreground/70">Then:</p>
+                      <ul className="list-disc list-inside pl-2 text-xs">
+                        {testCase.then.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </MobileSection>
+            
+            {userStory.api_specs?.length > 0 && (
+              <MobileSection 
+                title="API Specifications" 
+                icon={Code}
+                isOpen={openSections.api}
+                onToggle={() => toggleSection('api')}
+              >
+                <div className="space-y-2">
+                  {userStory.api_specs.map((spec, index) => (
+                    <div key={index} className="p-2 bg-accent/30 rounded-md text-sm">
+                      <p className="font-medium">{spec.method} {spec.endpoint}</p>
+                      <p className="text-xs">{spec.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </MobileSection>
+            )}
+          </div>
+        </ScrollArea>
+
+        <Button
+          onClick={onReset}
+          variant="outline"
+          className="w-full hover-lift transition-all duration-300 bg-gradient-to-r from-accent/80 to-primary/20 hover:from-primary/30 hover:to-accent/50 border-primary/20"
+        >
+          Generate New User Story
+        </Button>
+      </Card>
+    );
+  }
+
+  // Desktop view with tabs
   return (
     <Card className="w-full max-w-3xl p-6 glass-panel animate-fade-in space-y-6 tech-border">
       <div className="flex justify-between items-center">
@@ -144,7 +426,7 @@ const ResultsDisplay = ({ userStory, onReset }: ResultsDisplayProps) => {
         <div className="flex gap-2">
           <Button
             variant="outline"
-            size={isMobile ? "icon" : "default"}
+            size="default"
             onClick={copyToClipboard}
             className="hover-lift flex items-center gap-1.5"
             title="Copy as Markdown"
@@ -154,19 +436,18 @@ const ResultsDisplay = ({ userStory, onReset }: ResultsDisplayProps) => {
             ) : (
               <ClipboardCopy className="h-4 w-4" />
             )}
-            {!isMobile && <span>Copy as Markdown</span>}
+            <span>Copy as Markdown</span>
           </Button>
         </div>
       </div>
 
       <Tabs defaultValue="story" onValueChange={setActiveTab} className="w-full">
-        <TabsList className={`grid ${isMobile ? 'grid-cols-3 mb-2' : 'grid-cols-5 mb-4'} w-full`}>
+        <TabsList className="grid grid-cols-5 mb-4 w-full">
           <TabsTrigger value="story">Story</TabsTrigger>
           <TabsTrigger value="criteria">Criteria</TabsTrigger>
           <TabsTrigger value="requirements">Reqs</TabsTrigger>
-          {!isMobile && <TabsTrigger value="technical">Technical</TabsTrigger>}
-          {!isMobile && <TabsTrigger value="testing">Testing</TabsTrigger>}
-          {isMobile && <TabsTrigger value="more">More</TabsTrigger>}
+          <TabsTrigger value="technical">Technical</TabsTrigger>
+          <TabsTrigger value="testing">Testing</TabsTrigger>
         </TabsList>
 
         <TabsContent value="story" className="space-y-4">
@@ -254,205 +535,102 @@ const ResultsDisplay = ({ userStory, onReset }: ResultsDisplayProps) => {
           </div>
         </TabsContent>
 
-        {!isMobile && (
-          <TabsContent value="technical" className="space-y-4">
-            <div className="space-y-2">
-              <h3 className="text-lg font-medium flex items-center gap-2">
-                <Activity className="h-5 w-5 text-primary" />
-                Technical Considerations
-              </h3>
-              <ul className="list-disc list-inside pl-2 space-y-1">
-                {userStory.technical_considerations.map((consideration, index) => (
-                  <li key={index} className="text-foreground/90">
-                    {consideration}
-                  </li>
-                ))}
-              </ul>
+        <TabsContent value="technical" className="space-y-4">
+          <div className="space-y-2">
+            <h3 className="text-lg font-medium flex items-center gap-2">
+              <Activity className="h-5 w-5 text-primary" />
+              Technical Considerations
+            </h3>
+            <ul className="list-disc list-inside pl-2 space-y-1">
+              {userStory.technical_considerations.map((consideration, index) => (
+                <li key={index} className="text-foreground/90">
+                  {consideration}
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          <Separator />
+          
+          <div className="space-y-2">
+            <h3 className="text-lg font-medium flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-primary" />
+              Error Scenarios
+            </h3>
+            <div className="space-y-3">
+              {userStory.error_scenarios.map((scenario, index) => (
+                <div key={index} className="p-3 bg-destructive/10 rounded-md">
+                  <p className="font-medium">{scenario.scenario}</p>
+                  <p className="text-sm text-destructive">{scenario.message}</p>
+                </div>
+              ))}
             </div>
-            
-            <Separator />
-            
-            <div className="space-y-2">
-              <h3 className="text-lg font-medium flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-primary" />
-                Error Scenarios
-              </h3>
-              <div className="space-y-3">
-                {userStory.error_scenarios.map((scenario, index) => (
-                  <div key={index} className="p-3 bg-destructive/10 rounded-md">
-                    <p className="font-medium">{scenario.scenario}</p>
-                    <p className="text-sm text-destructive">{scenario.message}</p>
-                  </div>
-                ))}
+          </div>
+          
+          {userStory.api_specs?.length > 0 && (
+            <>
+              <Separator />
+              <div className="space-y-2">
+                <h3 className="text-lg font-medium flex items-center gap-2">
+                  <Code className="h-5 w-5 text-primary" />
+                  API Specifications
+                </h3>
+                <div className="space-y-3">
+                  {userStory.api_specs.map((spec, index) => (
+                    <div key={index} className="p-3 bg-accent/30 rounded-md">
+                      <p className="font-medium">{spec.method} {spec.endpoint}</p>
+                      <p className="text-sm">{spec.description}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-            
-            {userStory.api_specs?.length > 0 && (
-              <>
-                <Separator />
-                <div className="space-y-2">
-                  <h3 className="text-lg font-medium flex items-center gap-2">
-                    <Code className="h-5 w-5 text-primary" />
-                    API Specifications
-                  </h3>
-                  <div className="space-y-3">
-                    {userStory.api_specs.map((spec, index) => (
-                      <div key={index} className="p-3 bg-accent/30 rounded-md">
-                        <p className="font-medium">{spec.method} {spec.endpoint}</p>
-                        <p className="text-sm">{spec.description}</p>
-                      </div>
-                    ))}
+            </>
+          )}
+        </TabsContent>
+
+        <TabsContent value="testing" className="space-y-4">
+          <div className="space-y-2">
+            <h3 className="text-lg font-medium flex items-center gap-2">
+              <TestTube className="h-5 w-5 text-primary" />
+              Test Cases
+            </h3>
+            <div className="space-y-4">
+              {userStory.test_cases.map((testCase, index) => (
+                <div key={index} className="p-3 bg-accent/30 rounded-md space-y-2">
+                  <p className="font-medium">{testCase.title}</p>
+                  <p className="text-sm italic">{testCase.scenario}</p>
+                  
+                  <div className="space-y-1 mt-2">
+                    <p className="text-xs font-medium text-foreground/70">Given:</p>
+                    <ul className="list-disc list-inside pl-2 text-sm">
+                      {testCase.given.map((item, idx) => (
+                        <li key={idx}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-foreground/70">When:</p>
+                    <ul className="list-disc list-inside pl-2 text-sm">
+                      {testCase.when.map((item, idx) => (
+                        <li key={idx}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <p className="text-xs font-medium text-foreground/70">Then:</p>
+                    <ul className="list-disc list-inside pl-2 text-sm">
+                      {testCase.then.map((item, idx) => (
+                        <li key={idx}>{item}</li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
-              </>
-            )}
-          </TabsContent>
-        )}
-
-        {!isMobile && (
-          <TabsContent value="testing" className="space-y-4">
-            <div className="space-y-2">
-              <h3 className="text-lg font-medium flex items-center gap-2">
-                <TestTube className="h-5 w-5 text-primary" />
-                Test Cases
-              </h3>
-              <div className="space-y-4">
-                {userStory.test_cases.map((testCase, index) => (
-                  <div key={index} className="p-3 bg-accent/30 rounded-md space-y-2">
-                    <p className="font-medium">{testCase.title}</p>
-                    <p className="text-sm italic">{testCase.scenario}</p>
-                    
-                    <div className="space-y-1 mt-2">
-                      <p className="text-xs font-medium text-foreground/70">Given:</p>
-                      <ul className="list-disc list-inside pl-2 text-sm">
-                        {testCase.given.map((item, idx) => (
-                          <li key={idx}>{item}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    
-                    <div className="space-y-1">
-                      <p className="text-xs font-medium text-foreground/70">When:</p>
-                      <ul className="list-disc list-inside pl-2 text-sm">
-                        {testCase.when.map((item, idx) => (
-                          <li key={idx}>{item}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    
-                    <div className="space-y-1">
-                      <p className="text-xs font-medium text-foreground/70">Then:</p>
-                      <ul className="list-disc list-inside pl-2 text-sm">
-                        {testCase.then.map((item, idx) => (
-                          <li key={idx}>{item}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              ))}
             </div>
-          </TabsContent>
-        )}
-
-        {isMobile && (
-          <TabsContent value="more" className="space-y-6">
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium flex items-center gap-2">
-                <Activity className="h-5 w-5 text-primary" />
-                Technical Considerations
-              </h3>
-              <ul className="list-disc list-inside pl-2 space-y-1">
-                {userStory.technical_considerations.map((consideration, index) => (
-                  <li key={index} className="text-foreground/90">
-                    {consideration}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-            <Separator />
-            
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-primary" />
-                Error Scenarios
-              </h3>
-              <div className="space-y-3">
-                {userStory.error_scenarios.map((scenario, index) => (
-                  <div key={index} className="p-3 bg-destructive/10 rounded-md">
-                    <p className="font-medium">{scenario.scenario}</p>
-                    <p className="text-sm text-destructive">{scenario.message}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <Separator />
-            
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium flex items-center gap-2">
-                <TestTube className="h-5 w-5 text-primary" />
-                Test Cases
-              </h3>
-              <div className="space-y-4">
-                {userStory.test_cases.map((testCase, index) => (
-                  <div key={index} className="p-3 bg-accent/30 rounded-md space-y-2">
-                    <p className="font-medium">{testCase.title}</p>
-                    <p className="text-sm italic">{testCase.scenario}</p>
-                    
-                    <div className="space-y-1 mt-2">
-                      <p className="text-xs font-medium text-foreground/70">Given:</p>
-                      <ul className="list-disc list-inside pl-2 text-sm">
-                        {testCase.given.map((item, idx) => (
-                          <li key={idx}>{item}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    
-                    <div className="space-y-1">
-                      <p className="text-xs font-medium text-foreground/70">When:</p>
-                      <ul className="list-disc list-inside pl-2 text-sm">
-                        {testCase.when.map((item, idx) => (
-                          <li key={idx}>{item}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    
-                    <div className="space-y-1">
-                      <p className="text-xs font-medium text-foreground/70">Then:</p>
-                      <ul className="list-disc list-inside pl-2 text-sm">
-                        {testCase.then.map((item, idx) => (
-                          <li key={idx}>{item}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            {userStory.api_specs?.length > 0 && (
-              <>
-                <Separator />
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium flex items-center gap-2">
-                    <Code className="h-5 w-5 text-primary" />
-                    API Specifications
-                  </h3>
-                  <div className="space-y-3">
-                    {userStory.api_specs.map((spec, index) => (
-                      <div key={index} className="p-3 bg-accent/30 rounded-md">
-                        <p className="font-medium">{spec.method} {spec.endpoint}</p>
-                        <p className="text-sm">{spec.description}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
-          </TabsContent>
-        )}
+          </div>
+        </TabsContent>
       </Tabs>
 
       <Button
