@@ -5,11 +5,9 @@ import { Card } from "@/components/ui/card";
 import {
   ClipboardCopy,
   Check,
-  RefreshCw,
   FileText,
   ListChecks,
   FileQuestion,
-  Star,
   AlertCircle,
   Activity,
   Code,
@@ -24,6 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 
 interface ResultsDisplayProps {
   userStory: UserStoryResponse;
@@ -33,14 +32,103 @@ interface ResultsDisplayProps {
 const ResultsDisplay = ({ userStory, onReset }: ResultsDisplayProps) => {
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState("story");
+  const { toast } = useToast();
 
-  const copyToClipboard = async (text: string) => {
+  const generateMarkdown = () => {
+    let markdown = `# User Story\n\n${userStory.story}\n\n`;
+    
+    markdown += `## Value Statement\n\n${userStory.value_statement}\n\n`;
+    
+    markdown += `## Use Case Examples\n\n`;
+    userStory.use_case_examples.forEach((example, index) => {
+      markdown += `${index + 1}. ${example}\n`;
+    });
+    markdown += '\n';
+    
+    markdown += `## Acceptance Criteria\n\n`;
+    userStory.acceptance_criteria.forEach((criteria, index) => {
+      markdown += `${index + 1}. ${criteria}\n`;
+    });
+    markdown += '\n';
+    
+    markdown += `## Functional Requirements\n\n`;
+    userStory.functional_requirements.forEach((req, index) => {
+      markdown += `${index + 1}. ${req}\n`;
+    });
+    markdown += '\n';
+    
+    markdown += `## Non-Functional Requirements\n\n`;
+    userStory.non_functional_requirements.forEach((req, index) => {
+      markdown += `${index + 1}. ${req}\n`;
+    });
+    markdown += '\n';
+    
+    markdown += `## Technical Considerations\n\n`;
+    userStory.technical_considerations.forEach((consideration, index) => {
+      markdown += `${index + 1}. ${consideration}\n`;
+    });
+    markdown += '\n';
+    
+    markdown += `## Error Scenarios\n\n`;
+    userStory.error_scenarios.forEach((scenario, index) => {
+      markdown += `### ${index + 1}. ${scenario.scenario}\n`;
+      markdown += `- ${scenario.message}\n\n`;
+    });
+    
+    markdown += `## Test Cases\n\n`;
+    userStory.test_cases.forEach((testCase, index) => {
+      markdown += `### ${index + 1}. ${testCase.title}\n`;
+      markdown += `**Scenario:** ${testCase.scenario}\n\n`;
+      
+      markdown += `**Given:**\n`;
+      testCase.given.forEach(item => {
+        markdown += `- ${item}\n`;
+      });
+      
+      markdown += `\n**When:**\n`;
+      testCase.when.forEach(item => {
+        markdown += `- ${item}\n`;
+      });
+      
+      markdown += `\n**Then:**\n`;
+      testCase.then.forEach(item => {
+        markdown += `- ${item}\n`;
+      });
+      markdown += '\n';
+    });
+    
+    if (userStory.api_specs?.length > 0) {
+      markdown += `## API Specifications\n\n`;
+      userStory.api_specs.forEach((spec, index) => {
+        markdown += `### ${index + 1}. ${spec.method} ${spec.endpoint}\n`;
+        markdown += `${spec.description}\n\n`;
+      });
+    }
+    
+    markdown += `## Metadata\n\n`;
+    markdown += `- Priority: ${userStory.priority}\n`;
+    markdown += `- Effort Estimate: ${userStory.effort_estimate}\n`;
+    
+    return markdown;
+  };
+
+  const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(text);
+      const markdown = generateMarkdown();
+      await navigator.clipboard.writeText(markdown);
       setCopied(true);
+      toast({
+        title: "Copied to clipboard",
+        description: "The story has been copied in Markdown format",
+      });
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error("Failed to copy: ", err);
+      toast({
+        title: "Failed to copy",
+        description: "Could not copy the content to clipboard",
+        variant: "destructive",
+      });
     }
   };
 
@@ -54,23 +142,15 @@ const ResultsDisplay = ({ userStory, onReset }: ResultsDisplayProps) => {
         <div className="flex gap-2">
           <Button
             variant="outline"
-            size="icon"
-            onClick={() => copyToClipboard(userStory.story)}
-            className="hover-lift"
+            onClick={copyToClipboard}
+            className="hover-lift flex items-center gap-1.5"
           >
             {copied ? (
               <Check className="h-4 w-4 text-green-500" />
             ) : (
               <ClipboardCopy className="h-4 w-4" />
             )}
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={onReset}
-            className="hover-lift"
-          >
-            <RefreshCw className="h-4 w-4" />
+            <span>Copy as Markdown</span>
           </Button>
         </div>
       </div>
