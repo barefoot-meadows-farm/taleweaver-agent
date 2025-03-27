@@ -14,12 +14,11 @@ export async function generateUserStory(
       throw new Error("You must be logged in to generate user stories");
     }
 
-    // Make the API call
-    const response = await fetch("http://localhost:8000/generate-user-story", {
+    // Make the API call to the new endpoint
+    const response = await fetch("https://story-agent.fly.dev/generate-user-story", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${session.access_token}`
       },
       body: JSON.stringify(data),
     });
