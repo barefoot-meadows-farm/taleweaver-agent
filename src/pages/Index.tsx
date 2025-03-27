@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import UserStoryForm from "@/components/UserStoryForm";
 import ResultsDisplay from "@/components/ResultsDisplay";
 import { UserStoryResponse } from "@/types";
@@ -10,6 +10,21 @@ import { UserMenu } from "@/components/UserMenu";
 const Index = () => {
   const [userStory, setUserStory] = useState<UserStoryResponse | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Check if there's a story to display from localStorage when the component mounts
+  useEffect(() => {
+    const storedStory = localStorage.getItem('viewUserStory');
+    if (storedStory) {
+      try {
+        const parsedStory = JSON.parse(storedStory) as UserStoryResponse;
+        setUserStory(parsedStory);
+        // Clear the stored story to prevent it from showing up again on refresh
+        localStorage.removeItem('viewUserStory');
+      } catch (error) {
+        console.error('Error parsing stored user story:', error);
+      }
+    }
+  }, []);
 
   const handleSuccess = (result: UserStoryResponse) => {
     setUserStory(result);
