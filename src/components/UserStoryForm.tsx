@@ -1,17 +1,19 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UserStoryRequest } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { X, Plus, BrainCircuit, Settings, Users, Database, FileText, Loader } from "lucide-react";
+import { X, Plus, BrainCircuit, Settings, Users, Database, FileText, Loader, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { generateUserStory } from "@/lib/api";
 import LoadingAnimation from "./LoadingAnimation";
+import { supabase } from "@/integrations/supabase/client";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface UserStoryFormProps {
   onSuccess: (userStory: any) => void;
@@ -32,6 +34,41 @@ const UserStoryForm = ({
   const [additionalDetails, setAdditionalDetails] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showAdditionalFields, setShowAdditionalFields] = useState(false);
+  const [usageCount, setUsageCount] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchUsageCount() {
+      setIsLoading(true);
+      try {
+        // Get the first day of current month
+        const now = new Date();
+        const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session) {
+          const { count, error } = await supabase
+            .from('user_stories')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', session.user.id)
+            .gte('created_at', firstDayOfMonth.toISOString());
+            
+          if (error) {
+            console.error("Error fetching usage count:", error);
+          } else {
+            setUsageCount(count || 0);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch usage count:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    fetchUsageCount();
+  }, []);
 
   const addStakeholder = () => {
     if (!stakeholderInput.trim()) return;
@@ -81,6 +118,8 @@ const UserStoryForm = ({
     setSubmitting(false);
     
     if (result) {
+      // Update usage count after successful generation
+      setUsageCount(prev => prev !== null ? prev + 1 : 1);
       onSuccess(result);
     }
   };
@@ -97,8 +136,39 @@ const UserStoryForm = ({
     );
   }
 
+  const remainingStories = usageCount !== null ? Math.max(0, 5 - usageCount) : null;
+  const hasReachedLimit = remainingStories !== null && remainingStories <= 0;
+
   return (
     <Card className="w-full max-w-2xl p-6 glass-panel animate-fade-in tech-border">
+      {!isLoading && usageCount !== null && (
+        <div className={`mb-4 p-3 rounded-md ${hasReachedLimit ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'} flex items-center justify-between`}>
+          <div className="flex items-center gap-2">
+            <Info className="h-4 w-4" />
+            <span className="text-sm font-medium">
+              {hasReachedLimit 
+                ? "You've reached your limit of 5 free user stories this month." 
+                : `You've used ${usageCount} of 5 free user stories this month.`}
+            </span>
+          </div>
+          
+          {hasReachedLimit && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" size="sm" className="text-xs">
+                    Upgrade
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Upgrade to premium for unlimited user stories</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
+      )}
+      
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-1">
           <Label htmlFor="requirement" className="input-label flex items-center gap-1.5">
@@ -113,7 +183,7 @@ const UserStoryForm = ({
             className={`min-h-24 transition-all duration-200 focus:border-primary/50 focus:ring-primary/30 ${
               errors.requirement ? "border-destructive ring-destructive" : ""
             }`}
-            disabled={isSubmitting}
+            disabled={isSubmitting || hasReachedLimit}
           />
           {errors.requirement && (
             <p className="text-sm text-destructive mt-1 animate-slide-up">
@@ -127,7 +197,7 @@ const UserStoryForm = ({
             id="show-more"
             checked={showAdditionalFields}
             onCheckedChange={toggleAdditionalFields}
-            disabled={isSubmitting}
+            disabled={isSubmitting || hasReachedLimit}
           />
           <Label
             htmlFor="show-more"
@@ -243,12 +313,17 @@ const UserStoryForm = ({
         <Button
           type="submit"
           className="w-full py-6 hover-lift transition-all duration-300 font-medium bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-          disabled={isSubmitting}
+          disabled={isSubmitting || hasReachedLimit}
         >
           {isSubmitting ? (
             <>
               <Loader className="mr-2 h-4 w-4 animate-spin" />
               Generating User Story...
+            </>
+          ) : hasReachedLimit ? (
+            <>
+              <BrainCircuit className="mr-2 h-5 w-5" />
+              Upgrade to Generate More Stories
             </>
           ) : (
             <>
@@ -257,6 +332,12 @@ const UserStoryForm = ({
             </>
           )}
         </Button>
+        
+        {hasReachedLimit && (
+          <p className="text-xs text-center text-muted-foreground mt-2">
+            You've used all 5 free generations this month. Upgrade to continue generating user stories.
+          </p>
+        )}
       </form>
     </Card>
   );

@@ -3,6 +3,28 @@ import { UserStoryRequest, UserStoryResponse } from "@/types";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
+// Check if user has reached their monthly limit
+async function hasReachedMonthlyLimit(userId: string): Promise<boolean> {
+  // Get the first day of current month
+  const now = new Date();
+  const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  
+  // Query for stories created this month
+  const { count, error } = await supabase
+    .from('user_stories')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .gte('created_at', firstDayOfMonth.toISOString());
+  
+  if (error) {
+    console.error("Error checking monthly limit:", error);
+    return false; // Default to not limiting on error
+  }
+  
+  // Return true if count is 5 or more
+  return (count ?? 0) >= 5;
+}
+
 export async function generateUserStory(
   data: UserStoryRequest
 ): Promise<UserStoryResponse | null> {
@@ -12,6 +34,14 @@ export async function generateUserStory(
     
     if (!session) {
       throw new Error("You must be logged in to generate user stories");
+    }
+
+    // Check if user has reached monthly limit
+    const hasLimit = await hasReachedMonthlyLimit(session.user.id);
+    
+    if (hasLimit) {
+      toast.error("You've reached your limit of 5 free user stories this month. Please upgrade to continue.");
+      return null;
     }
 
     // Make the API call to the new endpoint
