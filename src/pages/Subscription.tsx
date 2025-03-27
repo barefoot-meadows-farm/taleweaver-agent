@@ -37,7 +37,9 @@ const Subscription = () => {
         ) : (
           <div className="text-center p-8 bg-background/80 rounded-lg border shadow-sm">
             <p className="mb-4 text-lg">Please sign in to view subscription options</p>
-            <Button as={Link} to="/auth">Sign In</Button>
+            <Button asChild>
+              <Link to="/auth">Sign In</Link>
+            </Button>
           </div>
         )}
       </main>
