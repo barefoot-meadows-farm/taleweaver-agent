@@ -4,7 +4,7 @@
  */
 
 // The publishable key is used for client-side Stripe integrations
-export const STRIPE_PUBLISHABLE_KEY = Deno.env.get('STRIPE_PUBLISHABLE_KEY') || "pk_test_51R75PBPRdN87cPdWDL0pSgcO3sOh7TScyWsyXEyBpK1OlhxvGwXBUXHoY4YJQXrMT6tVLT8XCjMKbOCXFbDfZQYM00LpOYXFFR";
+export const STRIPE_PUBLISHABLE_KEY = "pk_test_51R75PBPRdN87cPdWDL0pSgcO3sOh7TScyWsyXEyBpK1OlhxvGwXBUXHoY4YJQXrMT6tVLT8XCjMKbOCXFbDfZQYM00LpOYXFFR";
 
 /**
  * Helper to load the Stripe.js script dynamically
