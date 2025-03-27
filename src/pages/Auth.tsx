@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
-import { Loader2, CircuitBoard, LogIn, UserPlus, AlertCircle } from "lucide-react";
+import { Loader2, CircuitBoard, LogIn, UserPlus, AlertCircle, BookText } from "lucide-react";
 import { toast } from "sonner";
 
 const Auth = () => {
@@ -57,8 +57,12 @@ const Auth = () => {
 
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-1.5 px-4 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
+            <BookText className="h-3.5 w-3.5" />
+            AI-Powered Story Generator
+          </div>
           <h1 className="text-3xl font-bold mb-2 tracking-tight ai-text-gradient">
-            User Story Generator
+            Story Gen
           </h1>
           <p className="text-foreground/70">
             Sign in or create an account to craft perfect user stories

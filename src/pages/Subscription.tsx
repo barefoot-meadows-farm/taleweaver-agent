@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft, BookText, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import SubscriptionPlans from "@/components/SubscriptionPlans";
 import ManageSubscription from "@/components/ManageSubscription";
@@ -38,14 +38,14 @@ const Subscription = () => {
       <header className="max-w-3xl w-full text-center mb-12 animate-slide-down">
         <Link to="/" className="inline-flex items-center gap-1.5 px-4 py-1 bg-background/80 text-foreground rounded-full text-sm font-medium mb-4 hover:bg-background transition-colors">
           <ArrowLeft className="h-3.5 w-3.5" />
-          Back to Home
+          Back to Story Gen
         </Link>
         
         <div className="inline-flex items-center gap-1.5 px-4 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
-          <Sparkles className="h-3.5 w-3.5" />
+          <BookText className="h-3.5 w-3.5" />
           {subscriptionStatus?.hasActiveSubscription 
-            ? "Manage Your Subscription" 
-            : "Upgrade Your Experience"}
+            ? "Manage Your Story Gen Subscription" 
+            : "Upgrade Your Story Gen Experience"}
         </div>
         
         <h1 className="text-4xl sm:text-5xl font-bold mb-3 tracking-tight ai-text-gradient">
@@ -84,7 +84,7 @@ const Subscription = () => {
       </main>
 
       <footer className="mt-20 text-center text-sm text-foreground/60">
-        <p>Secure payments powered by Stripe</p>
+        <p>Story Gen &copy; {new Date().getFullYear()} | Secure payments powered by Stripe</p>
       </footer>
     </div>
   );

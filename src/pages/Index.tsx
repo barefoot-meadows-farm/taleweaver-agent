@@ -4,7 +4,7 @@ import UserStoryForm from "@/components/UserStoryForm";
 import ResultsDisplay from "@/components/ResultsDisplay";
 import { UserStoryResponse } from "@/types";
 import { Button } from "@/components/ui/button";
-import { CircuitBoard, Sparkles, Zap } from "lucide-react";
+import { BookText, CircuitBoard, Sparkles, Zap } from "lucide-react";
 import { UserMenu } from "@/components/UserMenu";
 
 const Index = () => {
@@ -26,11 +26,11 @@ const Index = () => {
       <header className="max-w-3xl w-full flex justify-between items-start mb-12 animate-slide-down">
         <div className="text-center flex-1">
           <div className="inline-flex items-center gap-1.5 px-4 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
-            <Sparkles className="h-3.5 w-3.5" />
-            AI-Powered User Story Generator
+            <BookText className="h-3.5 w-3.5" />
+            AI-Powered Story Generator
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold mb-3 tracking-tight ai-text-gradient">
-            Craft Perfect User Stories
+            Story Gen
           </h1>
           <p className="text-lg text-foreground/80 max-w-2xl mx-auto">
             Transform requirements into well-structured user stories with our
@@ -66,7 +66,7 @@ const Index = () => {
         <div className="flex items-center justify-center gap-1">
           <p>Powered by AI</p>
           <Zap className="h-3.5 w-3.5 text-primary" />
-          <p>User Story Generator &copy; {new Date().getFullYear()}</p>
+          <p>Story Gen &copy; {new Date().getFullYear()}</p>
         </div>
       </footer>
     </div>
