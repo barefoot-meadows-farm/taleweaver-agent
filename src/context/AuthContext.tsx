@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 type AuthContextType = {
   user: User | null;
@@ -22,22 +23,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+    const initializeAuth = async () => {
+      try {
+        // Set up auth state listener FIRST
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          (event, currentSession) => {
+            console.log("Auth state changed:", event);
+            setSession(currentSession);
+            setUser(currentSession?.user ?? null);
+            setIsLoading(false);
+          }
+        );
+
+        // THEN check for existing session
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Error getting session:", error);
+          setIsLoading(false);
+          return;
+        }
+        
+        console.log("Initial session check:", data.session ? "Session found" : "No session");
+        setSession(data.session);
+        setUser(data.session?.user ?? null);
+        setIsLoading(false);
+
+        return () => subscription.unsubscribe();
+      } catch (error) {
+        console.error("Auth initialization error:", error);
+        setIsLoading(false);
       }
-    );
+    };
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    initializeAuth();
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -66,6 +85,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       
       if (error) throw error;
+      toast.success("Account created successfully", {
+        description: "You can now sign in with your credentials"
+      });
       navigate("/");
     } catch (error: any) {
       throw error;
@@ -81,7 +103,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (error) throw error;
       navigate("/auth");
     } catch (error: any) {
-      throw error;
+      console.error("Sign out error:", error);
+      toast.error("Failed to sign out");
     } finally {
       setIsLoading(false);
     }
