@@ -11,6 +11,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { AuthGuard, PublicRouteGuard } from "./components/AuthGuard";
 import Subscription from "./pages/Subscription";
 import ProfileSettings from "./pages/ProfileSettings";
+import History from "./pages/History";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,6 +34,7 @@ const App = () => (
             <Route element={<AuthGuard />}>
               <Route path="/" element={<Index />} />
               <Route path="/profile" element={<ProfileSettings />} />
+              <Route path="/history" element={<History />} />
             </Route>
             
             {/* Public routes */}

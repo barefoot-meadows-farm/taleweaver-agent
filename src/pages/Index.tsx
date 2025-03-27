@@ -3,9 +3,9 @@ import { useState, useEffect } from "react";
 import UserStoryForm from "@/components/UserStoryForm";
 import ResultsDisplay from "@/components/ResultsDisplay";
 import { UserStoryResponse } from "@/types";
-import { Button } from "@/components/ui/button";
-import { BookText, CircuitBoard, Sparkles, Zap } from "lucide-react";
+import { BookText, CircuitBoard, Zap } from "lucide-react";
 import { UserMenu } from "@/components/UserMenu";
+import PreviousStoriesLink from "@/components/PreviousStoriesLink";
 
 const Index = () => {
   const [userStory, setUserStory] = useState<UserStoryResponse | null>(null);
@@ -69,11 +69,14 @@ const Index = () => {
         {userStory ? (
           <ResultsDisplay userStory={userStory} onReset={resetForm} />
         ) : (
-          <UserStoryForm 
-            onSuccess={handleSuccess} 
-            isSubmitting={isSubmitting}
-            setSubmitting={setIsSubmitting}
-          />
+          <>
+            <UserStoryForm 
+              onSuccess={handleSuccess} 
+              isSubmitting={isSubmitting}
+              setSubmitting={setIsSubmitting}
+            />
+            <PreviousStoriesLink />
+          </>
         )}
       </main>
 
