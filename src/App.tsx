@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./context/AuthContext";
 import { AuthGuard, PublicRouteGuard } from "./components/AuthGuard";
 import Subscription from "./pages/Subscription";
+import ProfileSettings from "./pages/ProfileSettings";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,6 +32,7 @@ const App = () => (
             {/* Protected routes */}
             <Route element={<AuthGuard />}>
               <Route path="/" element={<Index />} />
+              <Route path="/profile" element={<ProfileSettings />} />
             </Route>
             
             {/* Public routes */}
