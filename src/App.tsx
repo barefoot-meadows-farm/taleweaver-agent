@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./context/AuthContext";
 import { AuthGuard, PublicRouteGuard } from "./components/AuthGuard";
+import Subscription from "./pages/Subscription";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,9 @@ const App = () => (
             <Route element={<PublicRouteGuard />}>
               <Route path="/auth" element={<Auth />} />
             </Route>
+            
+            {/* Subscription page - accessible to all but has different UI for logged in/out users */}
+            <Route path="/subscription" element={<Subscription />} />
             
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />

@@ -1,10 +1,33 @@
 
-import { UserStoryRequest, UserStoryResponse } from "@/types";
+import { UserStoryRequest, UserStoryResponse, SubscriptionStatus } from "@/types";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 // Check if user has reached their monthly limit
 async function hasReachedMonthlyLimit(userId: string): Promise<boolean> {
+  // First check if user has an active subscription
+  try {
+    const { data, error } = await supabase.functions.invoke('check-subscription-status');
+    
+    if (error) {
+      console.error("Error checking subscription status:", error);
+      return false; // Fail open in case of errors
+    }
+    
+    // If user has an active subscription, they have no limit
+    if (data?.hasActiveSubscription) {
+      return false;
+    }
+    
+    // If user has one-time credits, they can use those
+    if (data?.remainingOneTimeCredits > 0) {
+      return false;
+    }
+  } catch (error) {
+    console.error("Error checking subscription:", error);
+    // Continue with free tier check in case of errors
+  }
+  
   // Get the first day of current month
   const now = new Date();
   const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -23,6 +46,28 @@ async function hasReachedMonthlyLimit(userId: string): Promise<boolean> {
   
   // Return true if count is 5 or more
   return (count ?? 0) >= 5;
+}
+
+export async function getSubscriptionStatus(): Promise<SubscriptionStatus | null> {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      return null;
+    }
+    
+    const { data, error } = await supabase.functions.invoke('check-subscription-status');
+    
+    if (error) {
+      throw error;
+    }
+    
+    return data as SubscriptionStatus;
+  } catch (error) {
+    console.error("Error checking subscription status:", error);
+    toast.error("Failed to check subscription status");
+    return null;
+  }
 }
 
 export async function generateUserStory(

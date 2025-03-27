@@ -10,10 +10,11 @@ import { X, Plus, BrainCircuit, Settings, Users, Database, FileText, Loader, Inf
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { generateUserStory } from "@/lib/api";
+import { generateUserStory, getSubscriptionStatus } from "@/lib/api";
 import LoadingAnimation from "./LoadingAnimation";
 import { supabase } from "@/integrations/supabase/client";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Link } from "react-router-dom";
 
 interface UserStoryFormProps {
   onSuccess: (userStory: any) => void;
@@ -36,9 +37,10 @@ const UserStoryForm = ({
   const [showAdditionalFields, setShowAdditionalFields] = useState(false);
   const [usageCount, setUsageCount] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<any>(null);
 
   useEffect(() => {
-    async function fetchUsageCount() {
+    async function fetchData() {
       setIsLoading(true);
       try {
         // Get the first day of current month
@@ -48,26 +50,36 @@ const UserStoryForm = ({
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session) {
-          const { count, error } = await supabase
-            .from('user_stories')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', session.user.id)
-            .gte('created_at', firstDayOfMonth.toISOString());
-            
-          if (error) {
-            console.error("Error fetching usage count:", error);
+          // Check subscription status
+          const status = await getSubscriptionStatus();
+          setSubscriptionStatus(status);
+          
+          // If user has an active subscription or one-time credits, we don't need to count monthly usage
+          if (status?.hasActiveSubscription || (status?.remainingOneTimeCredits && status.remainingOneTimeCredits > 0)) {
+            setUsageCount(0); // Just to show they haven't hit the limit
           } else {
-            setUsageCount(count || 0);
+            // Count monthly usage for free tier
+            const { count, error } = await supabase
+              .from('user_stories')
+              .select('*', { count: 'exact', head: true })
+              .eq('user_id', session.user.id)
+              .gte('created_at', firstDayOfMonth.toISOString());
+              
+            if (error) {
+              console.error("Error fetching usage count:", error);
+            } else {
+              setUsageCount(count || 0);
+            }
           }
         }
       } catch (error) {
-        console.error("Failed to fetch usage count:", error);
+        console.error("Failed to fetch data:", error);
       } finally {
         setIsLoading(false);
       }
     }
     
-    fetchUsageCount();
+    fetchData();
   }, []);
 
   const addStakeholder = () => {
@@ -136,35 +148,47 @@ const UserStoryForm = ({
     );
   }
 
-  const remainingStories = usageCount !== null ? Math.max(0, 5 - usageCount) : null;
-  const hasReachedLimit = remainingStories !== null && remainingStories <= 0;
+  const hasActiveSubscription = subscriptionStatus?.hasActiveSubscription;
+  const remainingOneTimeCredits = subscriptionStatus?.remainingOneTimeCredits || 0;
+  const hasOneTimeCredits = remainingOneTimeCredits > 0;
+  
+  const remainingFreeStories = usageCount !== null ? Math.max(0, 5 - usageCount) : null;
+  const hasReachedFreeLimit = !hasActiveSubscription && !hasOneTimeCredits && remainingFreeStories !== null && remainingFreeStories <= 0;
 
   return (
     <Card className="w-full max-w-2xl p-6 glass-panel animate-fade-in tech-border">
-      {!isLoading && usageCount !== null && (
-        <div className={`mb-4 p-3 rounded-md ${hasReachedLimit ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'} flex items-center justify-between`}>
+      {!isLoading && (
+        <div className={`mb-4 p-3 rounded-md ${hasReachedFreeLimit && !hasActiveSubscription && !hasOneTimeCredits ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'} flex items-center justify-between`}>
           <div className="flex items-center gap-2">
             <Info className="h-4 w-4" />
-            <span className="text-sm font-medium">
-              {hasReachedLimit 
-                ? "You've reached your limit of 5 free user stories this month." 
-                : `You've used ${usageCount} of 5 free user stories this month.`}
-            </span>
+            {hasActiveSubscription ? (
+              <span className="text-sm font-medium">
+                You have an active subscription with unlimited user stories!
+              </span>
+            ) : hasOneTimeCredits ? (
+              <span className="text-sm font-medium">
+                You have {remainingOneTimeCredits} one-time credits remaining.
+              </span>
+            ) : (
+              <span className="text-sm font-medium">
+                {hasReachedFreeLimit 
+                  ? "You've reached your limit of 5 free user stories this month." 
+                  : `You've used ${usageCount} of 5 free user stories this month.`}
+              </span>
+            )}
           </div>
           
-          {hasReachedLimit && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="outline" size="sm" className="text-xs">
-                    Upgrade
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Upgrade to premium for unlimited user stories</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+          {(hasReachedFreeLimit || (!hasActiveSubscription && !hasOneTimeCredits)) && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-xs"
+              asChild
+            >
+              <Link to="/subscription">
+                Upgrade
+              </Link>
+            </Button>
           )}
         </div>
       )}
@@ -313,14 +337,14 @@ const UserStoryForm = ({
         <Button
           type="submit"
           className="w-full py-6 hover-lift transition-all duration-300 font-medium bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-          disabled={isSubmitting || hasReachedLimit}
+          disabled={isSubmitting || hasReachedFreeLimit && !hasActiveSubscription && !hasOneTimeCredits}
         >
           {isSubmitting ? (
             <>
               <Loader className="mr-2 h-4 w-4 animate-spin" />
               Generating User Story...
             </>
-          ) : hasReachedLimit ? (
+          ) : hasReachedFreeLimit && !hasActiveSubscription && !hasOneTimeCredits ? (
             <>
               <BrainCircuit className="mr-2 h-5 w-5" />
               Upgrade to Generate More Stories
@@ -333,9 +357,12 @@ const UserStoryForm = ({
           )}
         </Button>
         
-        {hasReachedLimit && (
+        {hasReachedFreeLimit && !hasActiveSubscription && !hasOneTimeCredits && (
           <p className="text-xs text-center text-muted-foreground mt-2">
-            You've used all 5 free generations this month. Upgrade to continue generating user stories.
+            You've used all 5 free generations this month. 
+            <Link to="/subscription" className="text-primary ml-1 hover:underline">
+              Upgrade to continue
+            </Link>.
           </p>
         )}
       </form>

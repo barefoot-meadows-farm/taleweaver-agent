@@ -22,6 +22,12 @@ export interface UserStoryResponse {
   api_specs: ApiSpec[];
 }
 
+export interface SubscriptionStatus {
+  status: 'subscribed' | 'not_subscribed' | 'no_subscription';
+  hasActiveSubscription: boolean;
+  remainingOneTimeCredits: number;
+}
+
 interface ErrorScenario {
   scenario: string;
   message: string;
