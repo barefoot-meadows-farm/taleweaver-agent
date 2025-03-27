@@ -82,9 +82,9 @@ export async function generateUserStory(
     }
 
     // Check if user has reached monthly limit
-    const hasLimit = await hasReachedMonthlyLimit(session.user.id);
+    const hasReachedLimit = await hasReachedMonthlyLimit(session.user.id);
     
-    if (hasLimit) {
+    if (hasReachedLimit) {
       toast.error("You've reached your limit of 5 free user stories this month. Please upgrade to continue.");
       return null;
     }
