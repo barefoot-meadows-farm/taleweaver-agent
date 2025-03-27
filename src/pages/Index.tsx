@@ -5,6 +5,7 @@ import ResultsDisplay from "@/components/ResultsDisplay";
 import { UserStoryResponse } from "@/types";
 import { Button } from "@/components/ui/button";
 import { CircuitBoard, Sparkles, Zap } from "lucide-react";
+import { UserMenu } from "@/components/UserMenu";
 
 const Index = () => {
   const [userStory, setUserStory] = useState<UserStoryResponse | null>(null);
@@ -21,18 +22,24 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center px-4 py-12 sm:py-20 bg-gradient-to-br from-background via-accent/20 to-background/90">
-      <header className="max-w-3xl w-full text-center mb-12 animate-slide-down">
-        <div className="inline-flex items-center gap-1.5 px-4 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
-          <Sparkles className="h-3.5 w-3.5" />
-          AI-Powered User Story Generator
+      <header className="max-w-3xl w-full flex justify-between items-start mb-12 animate-slide-down">
+        <div className="text-center flex-1">
+          <div className="inline-flex items-center gap-1.5 px-4 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-4">
+            <Sparkles className="h-3.5 w-3.5" />
+            AI-Powered User Story Generator
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-bold mb-3 tracking-tight ai-text-gradient">
+            Craft Perfect User Stories
+          </h1>
+          <p className="text-lg text-foreground/80 max-w-2xl mx-auto">
+            Transform requirements into well-structured user stories with our
+            AI tool. Simply describe what you need, and let AI do the rest.
+          </p>
         </div>
-        <h1 className="text-4xl sm:text-5xl font-bold mb-3 tracking-tight ai-text-gradient">
-          Craft Perfect User Stories
-        </h1>
-        <p className="text-lg text-foreground/80 max-w-2xl mx-auto">
-          Transform requirements into well-structured user stories with our
-          AI tool. Simply describe what you need, and let AI do the rest.
-        </p>
+        
+        <div className="absolute top-4 right-4">
+          <UserMenu />
+        </div>
         
         <div className="absolute top-16 left-10 opacity-20 text-primary hidden lg:block">
           <CircuitBoard size={180} />

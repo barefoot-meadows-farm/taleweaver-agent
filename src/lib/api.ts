@@ -1,15 +1,25 @@
 
 import { UserStoryRequest, UserStoryResponse } from "@/types";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export async function generateUserStory(
   data: UserStoryRequest
 ): Promise<UserStoryResponse | null> {
   try {
+    // Get current user session
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      throw new Error("You must be logged in to generate user stories");
+    }
+
+    // Make the API call
     const response = await fetch("http://localhost:8000/generate-user-story", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${session.access_token}`
       },
       body: JSON.stringify(data),
     });
@@ -22,7 +32,25 @@ export async function generateUserStory(
       );
     }
 
-    return await response.json();
+    const result = await response.json();
+    
+    // Store the user story in Supabase
+    const { error } = await supabase.from('user_stories').insert({
+      user_id: session.user.id,
+      requirement: data.requirement,
+      context: data.context || null,
+      stakeholders: data.stakeholders || null,
+      api_required: data.api_required || false,
+      additional_details: data.additional_details || null,
+      result: result
+    });
+    
+    if (error) {
+      console.error("Error saving user story:", error);
+      // Don't throw here, still return the result
+    }
+
+    return result;
   } catch (error) {
     console.error("API request failed:", error);
     toast.error(
