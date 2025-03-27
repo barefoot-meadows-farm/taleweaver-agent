@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { UserStoryRequest } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { X, Plus, BrainCircuit, Settings, Users, Database, FileText } from "lucide-react";
+import { X, Plus, BrainCircuit, Settings, Users, Database, FileText, Loader } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -246,7 +247,7 @@ const UserStoryForm = ({
         >
           {isSubmitting ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader className="mr-2 h-4 w-4 animate-spin" />
               Generating User Story...
             </>
           ) : (
