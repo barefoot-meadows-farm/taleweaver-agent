@@ -70,19 +70,22 @@ serve(async (req) => {
 
     const hasActiveSubscription = subscriptions.data.length > 0;
     
-    // Get one-time payment information
+    // Get one-time payment information - only count successful charges
     const charges = await stripe.charges.list({
       customer: customerId,
       limit: 100
     });
     
-    // For simplicity, each one-time payment gives 30 credits
-    // In a real app, you'd track this in your database
-    const oneTimePaymentsCount = charges.data.filter(
-      charge => charge.amount_captured > 0 && !charge.disputed
+    // For simplicity, each successful one-time payment gives 30 credits
+    // Only count charges that were successful (paid status)
+    const successfulOneTimePayments = charges.data.filter(
+      charge => charge.status === 'succeeded' && 
+                charge.amount_captured > 0 && 
+                !charge.disputed && 
+                !charge.refunded
     ).length;
     
-    const totalOneTimeCredits = oneTimePaymentsCount * 30;
+    const totalOneTimeCredits = successfulOneTimePayments * 30;
     
     // For a real app, you'd need to track usage in the database
     // This is a simplified version
@@ -93,6 +96,8 @@ serve(async (req) => {
     
     const usedCredits = (userStories?.length || 0) - 5; // 5 free credits
     const remainingOneTimeCredits = Math.max(0, totalOneTimeCredits - Math.max(0, usedCredits));
+
+    console.log(`User: ${email}, Active subscription: ${hasActiveSubscription}, One-time credits: ${remainingOneTimeCredits}`);
 
     return new Response(
       JSON.stringify({ 
