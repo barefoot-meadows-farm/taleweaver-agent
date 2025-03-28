@@ -63,22 +63,18 @@ export const useUserStoryForm = (
           const status = await getSubscriptionStatus();
           setSubscriptionStatus(status);
           
-          // If user has an active subscription or one-time credits, we don't need to count monthly usage
-          if (status?.hasActiveSubscription || (status?.remainingOneTimeCredits && status.remainingOneTimeCredits > 0)) {
-            setUsageCount(0); // Just to show they haven't hit the limit
-          } else {
-            // Count monthly usage for free tier
-            const { count, error } = await supabase
-              .from('user_stories')
-              .select('*', { count: 'exact', head: true })
-              .eq('user_id', session.user.id)
-              .gte('created_at', firstDayOfMonth.toISOString());
+          // Count monthly usage for free tier (even if they have a subscription or one-time credits)
+          // This is just for display purposes
+          const { count, error } = await supabase
+            .from('user_stories')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', session.user.id)
+            .gte('created_at', firstDayOfMonth.toISOString());
               
-            if (error) {
-              console.error("Error fetching usage count:", error);
-            } else {
-              setUsageCount(count || 0);
-            }
+          if (error) {
+            console.error("Error fetching usage count:", error);
+          } else {
+            setUsageCount(count || 0);
           }
         }
       } catch (error) {
@@ -130,6 +126,11 @@ export const useUserStoryForm = (
   const hasActiveSubscription = subscriptionStatus?.hasActiveSubscription || false;
   const remainingOneTimeCredits = subscriptionStatus?.remainingOneTimeCredits || 0;
   
+  // Calculate whether user has reached the free limit
+  // They've reached the limit if they:
+  // 1. Don't have an active subscription AND
+  // 2. Have no remaining one-time credits AND
+  // 3. Have used all 5 free generations this month
   const remainingFreeStories = usageCount !== null ? Math.max(0, 5 - usageCount) : null;
   const hasReachedFreeLimit = !hasActiveSubscription && 
     remainingOneTimeCredits <= 0 && 

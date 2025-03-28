@@ -44,7 +44,7 @@ async function hasReachedMonthlyLimit(userId: string): Promise<boolean> {
     return false; // Default to not limiting on error
   }
   
-  // Return true if count is 5 or more
+  // Return true if count is 5 or more (reached the free limit)
   return (count ?? 0) >= 5;
 }
 
