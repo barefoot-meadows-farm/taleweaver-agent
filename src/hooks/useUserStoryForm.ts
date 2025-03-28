@@ -29,16 +29,21 @@ interface UseUserStoryFormResult {
 }
 
 export const useUserStoryForm = (
-  onSuccess: (userStory: any) => void,
-  setSubmitting: (isSubmitting: boolean) => void
+  onSuccess: (userStory: any, formValues: Partial<UserStoryRequest>) => void,
+  setSubmitting: (isSubmitting: boolean) => void,
+  initialValues: Partial<UserStoryRequest> | null = null
 ): UseUserStoryFormResult => {
-  const [requirement, setRequirement] = useState("");
-  const [context, setContext] = useState("");
-  const [stakeholders, setStakeholders] = useState<string[]>([]);
-  const [apiRequired, setApiRequired] = useState(false);
-  const [additionalDetails, setAdditionalDetails] = useState("");
+  const [requirement, setRequirement] = useState(initialValues?.requirement || "");
+  const [context, setContext] = useState(initialValues?.context || "");
+  const [stakeholders, setStakeholders] = useState<string[]>(initialValues?.stakeholders || []);
+  const [apiRequired, setApiRequired] = useState(initialValues?.api_required || false);
+  const [additionalDetails, setAdditionalDetails] = useState(initialValues?.additional_details || "");
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [showAdditionalFields, setShowAdditionalFields] = useState(false);
+  const [showAdditionalFields, setShowAdditionalFields] = useState(
+    initialValues ? 
+      !!(initialValues.context || initialValues.stakeholders?.length || initialValues.api_required || initialValues.additional_details) : 
+      false
+  );
   const [usageCount, setUsageCount] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
@@ -104,7 +109,7 @@ export const useUserStoryForm = (
     
     setSubmitting(true);
     
-    const data: UserStoryRequest = {
+    const formValues: UserStoryRequest = {
       requirement,
       context: context || undefined,
       stakeholders: stakeholders.length > 0 ? stakeholders : undefined,
@@ -112,13 +117,13 @@ export const useUserStoryForm = (
       additional_details: additionalDetails || undefined,
     };
     
-    const result = await generateUserStory(data);
+    const result = await generateUserStory(formValues);
     setSubmitting(false);
     
     if (result) {
       // Update usage count after successful generation
       setUsageCount(prev => prev !== null ? prev + 1 : 1);
-      onSuccess(result);
+      onSuccess(result, formValues);
     }
   };
 

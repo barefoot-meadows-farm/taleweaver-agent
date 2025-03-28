@@ -1,4 +1,3 @@
-
 import { UserStoryResponse } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -18,6 +17,7 @@ import {
   PenTool,
   ChevronDown,
   ChevronRight,
+  Redo,
 } from "lucide-react";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,9 +30,9 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface ResultsDisplayProps {
   userStory: UserStoryResponse;
   onReset: () => void;
+  onRedo: () => void;
 }
 
-// Create a collapsible section component for mobile
 const MobileSection = ({ 
   title, 
   icon: Icon, 
@@ -70,13 +70,12 @@ const MobileSection = ({
   );
 };
 
-const ResultsDisplay = ({ userStory, onReset }: ResultsDisplayProps) => {
+const ResultsDisplay = ({ userStory, onReset, onRedo }: ResultsDisplayProps) => {
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState("story");
   const { toast } = useToast();
   const isMobile = useIsMobile();
   
-  // State for mobile collapsible sections
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     story: true,
     value: false,
@@ -195,7 +194,6 @@ const ResultsDisplay = ({ userStory, onReset }: ResultsDisplayProps) => {
     }
   };
 
-  // Render mobile view with collapsible sections
   if (isMobile) {
     return (
       <Card className="w-full max-w-3xl p-4 glass-panel animate-fade-in space-y-4 tech-border">
@@ -404,18 +402,28 @@ const ResultsDisplay = ({ userStory, onReset }: ResultsDisplayProps) => {
           </div>
         </ScrollArea>
 
-        <Button
-          onClick={onReset}
-          variant="outline"
-          className="w-full hover-lift transition-all duration-300 bg-gradient-to-r from-accent/80 to-primary/20 hover:from-primary/30 hover:to-accent/50 border-primary/20"
-        >
-          Generate New User Story
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={onRedo}
+            variant="secondary"
+            className="flex-1 hover-lift transition-all duration-300"
+          >
+            <Redo className="h-4 w-4 mr-1.5" />
+            Edit
+          </Button>
+          
+          <Button
+            onClick={onReset}
+            variant="outline"
+            className="flex-1 hover-lift transition-all duration-300 bg-gradient-to-r from-accent/80 to-primary/20 hover:from-primary/30 hover:to-accent/50 border-primary/20"
+          >
+            New Story
+          </Button>
+        </div>
       </Card>
     );
   }
 
-  // Desktop view with tabs
   return (
     <Card className="w-full max-w-3xl p-6 glass-panel animate-fade-in space-y-6 tech-border">
       <div className="flex justify-between items-center">
@@ -633,13 +641,24 @@ const ResultsDisplay = ({ userStory, onReset }: ResultsDisplayProps) => {
         </TabsContent>
       </Tabs>
 
-      <Button
-        onClick={onReset}
-        variant="outline"
-        className="w-full hover-lift transition-all duration-300 bg-gradient-to-r from-accent/80 to-primary/20 hover:from-primary/30 hover:to-accent/50 border-primary/20"
-      >
-        Generate New User Story
-      </Button>
+      <div className="flex gap-3">
+        <Button
+          onClick={onRedo}
+          variant="secondary"
+          className="flex-1 hover-lift transition-all duration-300"
+        >
+          <Redo className="h-4 w-4 mr-1.5" />
+          Edit This Story
+        </Button>
+        
+        <Button
+          onClick={onReset}
+          variant="outline"
+          className="flex-1 hover-lift transition-all duration-300 bg-gradient-to-r from-accent/80 to-primary/20 hover:from-primary/30 hover:to-accent/50 border-primary/20"
+        >
+          Generate New Story
+        </Button>
+      </div>
     </Card>
   );
 };

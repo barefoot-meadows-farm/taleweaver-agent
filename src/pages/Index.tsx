@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import UserStoryForm from "@/components/UserStoryForm";
 import ResultsDisplay from "@/components/ResultsDisplay";
-import { UserStoryResponse } from "@/types";
+import { UserStoryResponse, UserStoryRequest } from "@/types";
 import { BookText, CircuitBoard, Zap } from "lucide-react";
 import { UserMenu } from "@/components/UserMenu";
 import PreviousStoriesLink from "@/components/PreviousStoriesLink";
@@ -10,6 +10,7 @@ import PreviousStoriesLink from "@/components/PreviousStoriesLink";
 const Index = () => {
   const [userStory, setUserStory] = useState<UserStoryResponse | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formValues, setFormValues] = useState<Partial<UserStoryRequest> | null>(null);
 
   // Check if there's a story to display from localStorage when the component mounts
   useEffect(() => {
@@ -26,14 +27,21 @@ const Index = () => {
     }
   }, []);
 
-  const handleSuccess = (result: UserStoryResponse) => {
+  const handleSuccess = (result: UserStoryResponse, values: Partial<UserStoryRequest>) => {
     setUserStory(result);
+    setFormValues(values); // Store the form values for potential redo
     setIsSubmitting(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const resetForm = () => {
     setUserStory(null);
+    setFormValues(null);
+  };
+
+  const handleRedo = () => {
+    setUserStory(null);
+    // Form values are already stored and will be used to prepopulate the form
   };
 
   return (
@@ -67,13 +75,18 @@ const Index = () => {
 
       <main className="w-full max-w-4xl mx-auto flex flex-col items-center gap-10 mb-20 relative z-10">
         {userStory ? (
-          <ResultsDisplay userStory={userStory} onReset={resetForm} />
+          <ResultsDisplay 
+            userStory={userStory} 
+            onReset={resetForm} 
+            onRedo={handleRedo}
+          />
         ) : (
           <>
             <UserStoryForm 
               onSuccess={handleSuccess} 
               isSubmitting={isSubmitting}
               setSubmitting={setIsSubmitting}
+              initialValues={formValues}
             />
             <PreviousStoriesLink />
           </>

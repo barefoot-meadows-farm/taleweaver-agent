@@ -14,15 +14,17 @@ import UserStoryFormSubmit from "./user-story/UserStoryFormSubmit";
 import { useUserStoryForm } from "@/hooks/useUserStoryForm";
 
 interface UserStoryFormProps {
-  onSuccess: (userStory: any) => void;
+  onSuccess: (userStory: any, formValues: Partial<UserStoryRequest>) => void;
   isSubmitting: boolean;
   setSubmitting: (isSubmitting: boolean) => void;
+  initialValues?: Partial<UserStoryRequest> | null;
 }
 
 const UserStoryForm = ({ 
   onSuccess, 
   isSubmitting, 
-  setSubmitting 
+  setSubmitting,
+  initialValues = null
 }: UserStoryFormProps) => {
   const {
     requirement,
@@ -44,7 +46,7 @@ const UserStoryForm = ({
     hasActiveSubscription,
     remainingOneTimeCredits,
     handleSubmit
-  } = useUserStoryForm(onSuccess, setSubmitting);
+  } = useUserStoryForm(onSuccess, setSubmitting, initialValues);
 
   if (isSubmitting) {
     return (
