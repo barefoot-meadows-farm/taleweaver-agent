@@ -1,21 +1,21 @@
 
-import { useState } from 'react';
-import { format } from 'date-fns';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useState } from "react";
+import { UserStoryResponse } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Book, Eye, Loader } from "lucide-react";
-import { UserStoryResponse } from '@/types';
-import { useNavigate } from 'react-router-dom';
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { FileText, ChevronRight, Calendar } from "lucide-react";
+import { format } from "date-fns";
 
 interface UserStory {
   id: string;
-  created_at: string;
   requirement: string;
+  context: string | null;
+  stakeholders: string[] | null;
+  api_required: boolean | null;
+  additional_details: string | null;
   result: UserStoryResponse;
-  context?: string;
-  stakeholders?: string[];
-  api_required?: boolean;
-  additional_details?: string;
+  created_at: string;
 }
 
 interface UserStoryListProps {
@@ -24,19 +24,32 @@ interface UserStoryListProps {
 }
 
 const UserStoryList = ({ userStories, isLoading }: UserStoryListProps) => {
-  const navigate = useNavigate();
+  const [expandedStoryId, setExpandedStoryId] = useState<string | null>(null);
   
-  const viewStory = (story: UserStory) => {
-    // Store the story in localStorage so we can retrieve it on the main page
+  const handleStoryClick = (story: UserStory) => {
+    // Store both the result and original request values
     localStorage.setItem('viewUserStory', JSON.stringify(story.result));
-    // Navigate to the main page
-    navigate('/');
+    localStorage.setItem('viewUserStoryRequest', JSON.stringify({
+      requirement: story.requirement,
+      context: story.context || undefined,
+      stakeholders: story.stakeholders || undefined,
+      api_required: story.api_required || undefined,
+      additional_details: story.additional_details || undefined
+    }));
+    
+    // Navigate to the home page to view the story
+    window.location.href = '/';
   };
   
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <Loader className="h-8 w-8 animate-spin text-primary" />
+      <div className="space-y-4">
+        {[...Array(3)].map((_, i) => (
+          <Card key={i} className="p-4">
+            <Skeleton className="h-5 w-3/4 mb-2" />
+            <Skeleton className="h-4 w-1/2" />
+          </Card>
+        ))}
       </div>
     );
   }
@@ -44,52 +57,65 @@ const UserStoryList = ({ userStories, isLoading }: UserStoryListProps) => {
   if (userStories.length === 0) {
     return (
       <div className="text-center py-8">
-        <Book className="h-12 w-12 mx-auto text-muted-foreground opacity-50 mb-4" />
-        <h3 className="text-lg font-medium">No user stories yet</h3>
-        <p className="text-muted-foreground mt-1">
-          Generate your first user story to see it here.
-        </p>
-        <Button className="mt-4" asChild>
-          <a href="/">Create New User Story</a>
+        <p className="text-muted-foreground">No user stories found. Generate your first one!</p>
+        <Button 
+          variant="default" 
+          onClick={() => window.location.href = '/'}
+          className="mt-4"
+        >
+          Create New Story
         </Button>
       </div>
     );
   }
-
+  
   return (
-    <div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Date</TableHead>
-            <TableHead className="w-[50%]">Requirement</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {userStories.map((story) => (
-            <TableRow key={story.id}>
-              <TableCell className="font-medium">
+    <div className="space-y-4">
+      {userStories.map((story) => (
+        <Card 
+          key={story.id} 
+          className={`p-4 cursor-pointer hover:border-primary/50 transition-all ${
+            expandedStoryId === story.id ? 'border-primary/50' : ''
+          }`}
+          onClick={() => setExpandedStoryId(expandedStoryId === story.id ? null : story.id)}
+        >
+          <div className="flex justify-between items-start gap-2">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <FileText className="h-4 w-4 text-primary" />
+                <h3 className="font-semibold text-sm line-clamp-1">{story.requirement}</h3>
+              </div>
+              
+              <div className="flex items-center text-xs text-muted-foreground">
+                <Calendar className="h-3 w-3 mr-1" />
                 {format(new Date(story.created_at), 'MMM d, yyyy')}
-              </TableCell>
-              <TableCell className="max-w-xs truncate">
-                {story.requirement}
-              </TableCell>
-              <TableCell className="text-right">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="flex items-center gap-1"
-                  onClick={() => viewStory(story)}
-                >
-                  <Eye className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">View</span>
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+              </div>
+            </div>
+            
+            <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${
+              expandedStoryId === story.id ? 'rotate-90' : ''
+            }`} />
+          </div>
+          
+          {expandedStoryId === story.id && (
+            <div className="mt-4 pt-4 border-t">
+              <p className="text-sm mb-2 line-clamp-3">{story.result.value_statement}</p>
+              
+              <Button 
+                variant="default" 
+                size="sm" 
+                className="mt-2"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleStoryClick(story);
+                }}
+              >
+                View Details
+              </Button>
+            </div>
+          )}
+        </Card>
+      ))}
     </div>
   );
 };

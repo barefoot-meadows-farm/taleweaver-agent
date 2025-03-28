@@ -15,12 +15,22 @@ const Index = () => {
   // Check if there's a story to display from localStorage when the component mounts
   useEffect(() => {
     const storedStory = localStorage.getItem('viewUserStory');
+    const storedRequest = localStorage.getItem('viewUserStoryRequest');
+    
     if (storedStory) {
       try {
         const parsedStory = JSON.parse(storedStory) as UserStoryResponse;
         setUserStory(parsedStory);
+        
+        // Set form values if they exist
+        if (storedRequest) {
+          const parsedRequest = JSON.parse(storedRequest) as Partial<UserStoryRequest>;
+          setFormValues(parsedRequest);
+        }
+        
         // Clear the stored story to prevent it from showing up again on refresh
         localStorage.removeItem('viewUserStory');
+        localStorage.removeItem('viewUserStoryRequest');
       } catch (error) {
         console.error('Error parsing stored user story:', error);
       }
