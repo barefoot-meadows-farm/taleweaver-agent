@@ -71,9 +71,11 @@ serve(async (req) => {
     const hasActiveSubscription = subscriptions.data.length > 0;
     
     // Get all subscriptions (including past ones) to determine periods of subscription
+    // Fix: Use string instead of array for status parameter
     const allSubscriptions = await stripe.subscriptions.list({
       customer: customerId,
-      status: ['active', 'canceled', 'past_due', 'unpaid'],
+      // Fix: Don't pass an array, pass a comma-separated string for status
+      status: 'active,canceled,past_due,unpaid',
       limit: 100
     });
     
