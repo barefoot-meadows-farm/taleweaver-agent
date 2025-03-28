@@ -95,7 +95,15 @@ const Index = () => {
 
       <footer className="w-full max-w-4xl mx-auto text-center text-foreground/60 text-sm">
         <div className="flex items-center justify-center gap-1">
-          <p>Powered by AI</p>
+          <p>Powered by</p>
+          <a 
+            href="https://binarybloom.dev" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-primary hover:underline flex items-center"
+          >
+            Binary Bloom
+          </a>
           <Zap className="h-3.5 w-3.5 text-primary" />
           <p>Story Gen &copy; {new Date().getFullYear()}</p>
         </div>
