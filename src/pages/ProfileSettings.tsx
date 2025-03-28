@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -12,19 +11,8 @@ import { getSubscriptionStatus } from "@/lib/api";
 import ManageSubscription from "@/components/ManageSubscription";
 import AccountSettings from "@/components/AccountSettings";
 import UserStoryList from "@/components/UserStoryList";
-import { UserStoryResponse } from "@/types";
+import { UserStory, UserStoryResponse } from "@/types";
 import { Json } from "@/integrations/supabase/types";
-
-interface UserStory {
-  id: string;
-  created_at: string;
-  requirement: string;
-  result: UserStoryResponse;
-  context?: string;
-  stakeholders?: string[];
-  api_required?: boolean;
-  additional_details?: string;
-}
 
 // Interface representing the raw data from Supabase
 interface RawUserStory {
@@ -32,10 +20,10 @@ interface RawUserStory {
   created_at: string;
   requirement: string;
   result: Json;
-  context?: string;
-  stakeholders?: string[];
-  api_required?: boolean;
-  additional_details?: string;
+  context?: string | null;
+  stakeholders?: string[] | null;
+  api_required?: boolean | null;
+  additional_details?: string | null;
   user_id: string;
 }
 
@@ -68,13 +56,20 @@ const ProfileSettings = () => {
       
       // Transform the raw data to match our UserStory interface
       return (data as RawUserStory[]).map(story => ({
-        ...story,
+        id: story.id,
+        created_at: story.created_at,
+        requirement: story.requirement,
+        context: story.context,
+        stakeholders: story.stakeholders,
+        api_required: story.api_required,
+        additional_details: story.additional_details,
         result: story.result as unknown as UserStoryResponse
       })) as UserStory[];
     },
     enabled: !!user,
   });
 
+  
   return (
     <div className="min-h-screen flex flex-col items-center px-4 py-12 bg-gradient-to-br from-background via-accent/20 to-background/90">
       <div className="w-full max-w-4xl">

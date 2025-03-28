@@ -1,22 +1,10 @@
-
 import { useState } from "react";
-import { UserStoryResponse } from "@/types";
+import { UserStory, UserStoryResponse } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FileText, ChevronRight, Calendar } from "lucide-react";
 import { format } from "date-fns";
-
-interface UserStory {
-  id: string;
-  requirement: string;
-  context: string | null;
-  stakeholders: string[] | null;
-  api_required: boolean | null;
-  additional_details: string | null;
-  result: UserStoryResponse;
-  created_at: string;
-}
 
 interface UserStoryListProps {
   userStories: UserStory[];

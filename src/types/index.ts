@@ -22,6 +22,18 @@ export interface UserStoryResponse {
   api_specs: ApiSpec[];
 }
 
+export interface UserStory {
+  id: string;
+  created_at: string;
+  requirement: string;
+  result: UserStoryResponse;
+  context: string | null;
+  stakeholders: string[] | null;
+  api_required: boolean | null;
+  additional_details: string | null;
+  user_id?: string;
+}
+
 export interface SubscriptionStatus {
   status: 'subscribed' | 'not_subscribed' | 'no_subscription';
   hasActiveSubscription: boolean;
