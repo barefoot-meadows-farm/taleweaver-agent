@@ -75,7 +75,7 @@ serve(async (req) => {
     const allSubscriptions = await stripe.subscriptions.list({
       customer: customerId,
       // Fix: Don't pass an array, pass a comma-separated string for status
-      status: 'active,canceled,past_due,unpaid',
+      status: 'all', // This will include all past and current subscriptions
       limit: 100
     });
     
