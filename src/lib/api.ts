@@ -1,4 +1,3 @@
-
 import { UserStoryRequest, UserStoryResponse, SubscriptionStatus } from "@/types";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,29 +22,32 @@ async function hasReachedMonthlyLimit(userId: string): Promise<boolean> {
     if (data?.remainingOneTimeCredits > 0) {
       return false;
     }
+
+    // If we reach here, user has no subscription and no one-time credits
+    // Now check if they've reached the free tier limit (5 generations per month)
+    
+    // Get the first day of current month
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    // Query for stories created this month
+    const { count, error: countError } = await supabase
+      .from('user_stories')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .gte('created_at', firstDayOfMonth.toISOString());
+    
+    if (countError) {
+      console.error("Error checking monthly limit:", countError);
+      return false; // Default to not limiting on error
+    }
+    
+    // Return true if count is 5 or more (reached the free limit)
+    return (count ?? 0) >= 5;
   } catch (error) {
-    console.error("Error checking subscription:", error);
-    // Continue with free tier check in case of errors
-  }
-  
-  // Get the first day of current month
-  const now = new Date();
-  const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  
-  // Query for stories created this month
-  const { count, error } = await supabase
-    .from('user_stories')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId)
-    .gte('created_at', firstDayOfMonth.toISOString());
-  
-  if (error) {
-    console.error("Error checking monthly limit:", error);
+    console.error("Error in hasReachedMonthlyLimit:", error);
     return false; // Default to not limiting on error
   }
-  
-  // Return true if count is 5 or more (reached the free limit)
-  return (count ?? 0) >= 5;
 }
 
 export async function getSubscriptionStatus(): Promise<SubscriptionStatus | null> {
