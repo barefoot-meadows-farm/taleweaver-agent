@@ -3,9 +3,12 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
-import { BookText, CircleHelp } from "lucide-react";
+import { BookText, CircleHelp, LayoutDashboard } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const Navigation = () => {
+  const { user } = useAuth();
+  
   return (
     <NavigationMenu className="mx-auto">
       <NavigationMenuList>
@@ -15,6 +18,15 @@ const Navigation = () => {
             Home
           </Link>
         </NavigationMenuItem>
+        
+        {user && (
+          <NavigationMenuItem>
+            <Link to="/dashboard" className={navigationMenuTriggerStyle()}>
+              <LayoutDashboard className="mr-1 h-4 w-4" />
+              Dashboard
+            </Link>
+          </NavigationMenuItem>
+        )}
         
         <NavigationMenuItem>
           <Link to="/about" className={navigationMenuTriggerStyle()}>

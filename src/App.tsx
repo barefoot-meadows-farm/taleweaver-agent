@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index";
+import PublicIndex from "./pages/PublicIndex";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "./context/AuthContext";
@@ -33,14 +34,17 @@ const App = () => (
         <BrowserRouter>
           <AuthProvider>
             <Routes>
-              {/* Protected routes */}
+              {/* Public home page - visible to all */}
+              <Route path="/" element={<PublicIndex />} />
+              
+              {/* Protected routes - require authentication */}
               <Route element={<AuthGuard />}>
-                <Route path="/" element={<Index />} />
+                <Route path="/dashboard" element={<Index />} />
                 <Route path="/profile" element={<ProfileSettings />} />
                 <Route path="/history" element={<History />} />
               </Route>
               
-              {/* Public routes */}
+              {/* Public routes - only for non-authenticated users */}
               <Route element={<PublicRouteGuard />}>
                 <Route path="/auth" element={<Auth />} />
               </Route>
