@@ -12,6 +12,7 @@ import { AuthGuard, PublicRouteGuard } from "./components/AuthGuard";
 import Subscription from "./pages/Subscription";
 import ProfileSettings from "./pages/ProfileSettings";
 import History from "./pages/History";
+import About from "./pages/About";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,6 +45,9 @@ const App = () => (
             
             {/* Subscription page - accessible to all but has different UI for logged in/out users */}
             <Route path="/subscription" element={<Subscription />} />
+            
+            {/* About page - accessible to all */}
+            <Route path="/about" element={<About />} />
             
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />

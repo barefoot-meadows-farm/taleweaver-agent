@@ -6,6 +6,7 @@ import { UserStoryResponse, UserStoryRequest } from "@/types";
 import { BookText, CircuitBoard, Zap } from "lucide-react";
 import { UserMenu } from "@/components/UserMenu";
 import PreviousStoriesLink from "@/components/PreviousStoriesLink";
+import Navigation from "@/components/Navigation";
 
 const Index = () => {
   const [userStory, setUserStory] = useState<UserStoryResponse | null>(null);
@@ -69,6 +70,10 @@ const Index = () => {
             Transform requirements into well-structured user stories with our
             AI tool. Simply describe what you need, and let AI do the rest.
           </p>
+          
+          <div className="mt-6">
+            <Navigation />
+          </div>
         </div>
         
         <div className="absolute top-4 right-4">
