@@ -34,12 +34,12 @@ const App = () => (
         <BrowserRouter>
           <AuthProvider>
             <Routes>
-              {/* Public home page - visible to all */}
-              <Route path="/" element={<PublicIndex />} />
+              {/* Dashboard - accessible to all but has different UI for logged in/out users */}
+              <Route path="/" element={<Index />} />
+              <Route path="/dashboard" element={<Index />} />
               
               {/* Protected routes - require authentication */}
               <Route element={<AuthGuard />}>
-                <Route path="/dashboard" element={<Index />} />
                 <Route path="/profile" element={<ProfileSettings />} />
                 <Route path="/history" element={<History />} />
               </Route>
