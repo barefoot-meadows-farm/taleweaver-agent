@@ -15,6 +15,7 @@ import Subscription from "./pages/Subscription";
 import ProfileSettings from "./pages/ProfileSettings";
 import History from "./pages/History";
 import About from "./pages/About";
+import Contact from "./pages/Contact";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -52,8 +53,9 @@ const App = () => (
               {/* Subscription page - accessible to all but has different UI for logged in/out users */}
               <Route path="/subscription" element={<Subscription />} />
               
-              {/* About page - accessible to all */}
+              {/* Public pages - accessible to all */}
               <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
               
               {/* Catch-all route */}
               <Route path="*" element={<NotFound />} />
