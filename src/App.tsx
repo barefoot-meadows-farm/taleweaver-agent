@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import React from "react";
 import Index from "./pages/Index";
 import PublicIndex from "./pages/PublicIndex";
 import Auth from "./pages/Auth";
@@ -27,8 +28,8 @@ const queryClient = new QueryClient({
 });
 
 // Create a wrapper component to handle TooltipProvider correctly
-const AppContent = () => (
-  <TooltipProvider>
+const AppContent = () => {
+  return (
     <Routes>
       {/* Dashboard - accessible to all but has different UI for logged in/out users */}
       <Route path="/" element={<Index />} />
@@ -55,21 +56,28 @@ const AppContent = () => (
       {/* Catch-all route */}
       <Route path="*" element={<NotFound />} />
     </Routes>
-  </TooltipProvider>
-);
+  );
+};
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <HelmetProvider>
-      <Toaster />
-      <Sonner />
+// Define App as a proper React functional component
+const App = () => {
+  return (
+    <React.StrictMode>
       <BrowserRouter>
-        <AuthProvider>
-          <AppContent />
-        </AuthProvider>
+        <HelmetProvider>
+          <QueryClientProvider client={queryClient}>
+            <TooltipProvider>
+              <AuthProvider>
+                <Toaster />
+                <Sonner />
+                <AppContent />
+              </AuthProvider>
+            </TooltipProvider>
+          </QueryClientProvider>
+        </HelmetProvider>
       </BrowserRouter>
-    </HelmetProvider>
-  </QueryClientProvider>
-);
+    </React.StrictMode>
+  );
+};
 
 export default App;
