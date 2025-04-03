@@ -13,7 +13,7 @@ const PageLayout = ({ children, showNavigation = true }: PageLayoutProps) => {
     <div className="min-h-screen flex flex-col">
       {showNavigation && (
         <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="container flex h-14 items-center">
+          <div className="container h-14">
             <Navigation />
           </div>
         </header>

@@ -11,7 +11,7 @@ const Navigation = () => {
   const { user } = useAuth();
   
   return (
-    <div className="w-full flex items-center justify-between">
+    <div className="h-full w-full flex items-center justify-between">
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
