@@ -15,6 +15,14 @@ import AccountSettings from "@/components/AccountSettings";
 import UserStoryList from "@/components/UserStoryList";
 import { UserStory, UserStoryResponse } from "@/types";
 import { Json } from "@/integrations/supabase/types";
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious 
+} from "@/components/ui/pagination";
 
 // Interface representing the raw data from Supabase
 interface RawUserStory {
@@ -29,9 +37,13 @@ interface RawUserStory {
   user_id: string;
 }
 
+const ITEMS_PER_PAGE = 5;
+
 const ProfileSettings = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("subscription");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalStories, setTotalStories] = useState(0);
 
   // Fetch subscription status
   const { data: subscriptionStatus } = useQuery({
@@ -40,16 +52,41 @@ const ProfileSettings = () => {
     enabled: !!user,
   });
 
-  // Fetch user stories
+  // Fetch user stories count for pagination
+  useQuery({
+    queryKey: ['userStoriesCount'],
+    queryFn: async () => {
+      if (!user) return 0;
+      
+      const { count, error } = await supabase
+        .from('user_stories')
+        .select('*', { count: 'exact', head: true });
+        
+      if (error) {
+        console.error("Error fetching user stories count:", error);
+        throw error;
+      }
+      
+      setTotalStories(count || 0);
+      return count;
+    },
+    enabled: !!user && activeTab === "stories",
+  });
+
+  // Fetch paginated user stories
   const { data: userStories, isLoading: isLoadingStories } = useQuery({
-    queryKey: ['userStories'],
+    queryKey: ['userStories', currentPage],
     queryFn: async () => {
       if (!user) return [];
+      
+      const from = (currentPage - 1) * ITEMS_PER_PAGE;
+      const to = from + ITEMS_PER_PAGE - 1;
       
       const { data, error } = await supabase
         .from('user_stories')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(from, to);
         
       if (error) {
         console.error("Error fetching user stories:", error);
@@ -68,9 +105,16 @@ const ProfileSettings = () => {
         result: story.result as unknown as UserStoryResponse
       })) as UserStory[];
     },
-    enabled: !!user,
+    enabled: !!user && activeTab === "stories",
   });
 
+  const totalPages = Math.ceil(totalStories / ITEMS_PER_PAGE);
+  
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
   
   return (
     <PageLayout>
@@ -145,6 +189,40 @@ const ProfileSettings = () => {
                     userStories={userStories || []} 
                     isLoading={isLoadingStories} 
                   />
+                  
+                  {totalStories > ITEMS_PER_PAGE && (
+                    <div className="mt-6">
+                      <Pagination>
+                        <PaginationContent>
+                          <PaginationItem>
+                            <PaginationPrevious 
+                              onClick={() => handlePageChange(currentPage - 1)}
+                              className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                            />
+                          </PaginationItem>
+                          
+                          {Array.from({ length: totalPages }).map((_, index) => (
+                            <PaginationItem key={index}>
+                              <PaginationLink
+                                onClick={() => handlePageChange(index + 1)}
+                                isActive={currentPage === index + 1}
+                                className="cursor-pointer"
+                              >
+                                {index + 1}
+                              </PaginationLink>
+                            </PaginationItem>
+                          ))}
+                          
+                          <PaginationItem>
+                            <PaginationNext 
+                              onClick={() => handlePageChange(currentPage + 1)}
+                              className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                            />
+                          </PaginationItem>
+                        </PaginationContent>
+                      </Pagination>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
