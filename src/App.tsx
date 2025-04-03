@@ -26,43 +26,48 @@ const queryClient = new QueryClient({
   },
 });
 
+// Create a wrapper component to handle TooltipProvider correctly
+const AppContent = () => (
+  <TooltipProvider>
+    <Routes>
+      {/* Dashboard - accessible to all but has different UI for logged in/out users */}
+      <Route path="/" element={<Index />} />
+      <Route path="/dashboard" element={<Index />} />
+      
+      {/* Protected routes - require authentication */}
+      <Route element={<AuthGuard />}>
+        <Route path="/profile" element={<ProfileSettings />} />
+        <Route path="/history" element={<History />} />
+      </Route>
+      
+      {/* Public routes - only for non-authenticated users */}
+      <Route element={<PublicRouteGuard />}>
+        <Route path="/auth" element={<Auth />} />
+      </Route>
+      
+      {/* Subscription page - accessible to all but has different UI for logged in/out users */}
+      <Route path="/subscription" element={<Subscription />} />
+      
+      {/* Public pages - accessible to all */}
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
+      
+      {/* Catch-all route */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  </TooltipProvider>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <HelmetProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AuthProvider>
-            <Routes>
-              {/* Dashboard - accessible to all but has different UI for logged in/out users */}
-              <Route path="/" element={<Index />} />
-              <Route path="/dashboard" element={<Index />} />
-              
-              {/* Protected routes - require authentication */}
-              <Route element={<AuthGuard />}>
-                <Route path="/profile" element={<ProfileSettings />} />
-                <Route path="/history" element={<History />} />
-              </Route>
-              
-              {/* Public routes - only for non-authenticated users */}
-              <Route element={<PublicRouteGuard />}>
-                <Route path="/auth" element={<Auth />} />
-              </Route>
-              
-              {/* Subscription page - accessible to all but has different UI for logged in/out users */}
-              <Route path="/subscription" element={<Subscription />} />
-              
-              {/* Public pages - accessible to all */}
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
-              
-              {/* Catch-all route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </AuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </BrowserRouter>
     </HelmetProvider>
   </QueryClientProvider>
 );

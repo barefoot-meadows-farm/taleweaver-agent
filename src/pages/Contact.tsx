@@ -20,8 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
+import PageLayout from "@/components/PageLayout";
 
 // Form validation schema
 const contactFormSchema = z.object({
@@ -49,19 +48,13 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <PageLayout>
       <Helmet>
         <title>Contact Us | User Story Generator</title>
         <meta name="description" content="Contact us with your feedback, questions, or feature requests." />
       </Helmet>
 
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center">
-          <Navigation />
-        </div>
-      </header>
-
-      <main className="flex-1 container max-w-4xl py-12">
+      <div className="container max-w-4xl py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tight mb-4">Contact Us</h1>
@@ -151,10 +144,8 @@ const Contact = () => {
             </CardContent>
           </Card>
         </div>
-      </main>
-
-      <Footer />
-    </div>
+      </div>
+    </PageLayout>
   );
 };
 
