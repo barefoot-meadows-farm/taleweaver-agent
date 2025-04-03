@@ -18,10 +18,12 @@ const SubscriptionStatus = ({
 }: SubscriptionStatusProps) => {
   if (isLoading) return null;
 
-  const remainingFreeStories = usageCount !== null ? Math.max(0, 5 - usageCount) : null;
+  // Handle null usageCount - default to 0
+  const usedStories = usageCount !== null ? usageCount : 0;
+  const remainingFreeStories = Math.max(0, 5 - usedStories);
+  
   const hasReachedFreeLimit = !hasActiveSubscription && 
     remainingOneTimeCredits <= 0 && 
-    remainingFreeStories !== null && 
     remainingFreeStories <= 0;
 
   return (
@@ -44,7 +46,7 @@ const SubscriptionStatus = ({
           <span className="text-sm font-medium">
             {hasReachedFreeLimit 
               ? "You've reached your limit of 5 free user stories this month." 
-              : `You've used ${usageCount} of 5 free user stories this month.`}
+              : `You've used ${usedStories} of 5 free user stories this month.`}
           </span>
         )}
       </div>
